@@ -7,7 +7,7 @@ CC ?= gcc
 AR ?= ar
 CFLAGS ?= -O2 -Wall -Wextra
 CFLAGS := ${CFLAGS} -I.
-DESTDIR ?= /usr/local/lib
+DESTDIR ?= /usr/local
 
 OBJS := $(OBJ)/tar.o
 
@@ -24,7 +24,8 @@ $(OBJ)/%.o: $(SRC)/%.c
 install:
 	@echo -- Installing $(LIBNAME).a
 	@mkdir -p $(DESTDIR)
-	cp $(OUTPUT)/$(LIBNAME).a $(DESTDIR)
+	cp $(OUTPUT)/$(LIBNAME).a $(DESTDIR)/lib
+	cp ./minitar.h $(DESTDIR)/include
 
 clean:
 	rm -f $(OBJ)/*.o
@@ -32,4 +33,5 @@ clean:
 
 uninstall:
 	@echo -- Removing $(LIBNAME).a
-	rm -f $(DESTDIR)/$(LIBNAME).a
+	rm -f $(DESTDIR)/lib/$(LIBNAME).a
+	rm -f $(DESTDIR)/include/minitar.h
