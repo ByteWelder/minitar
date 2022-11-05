@@ -9,7 +9,8 @@ CFLAGS ?= -O2 -Wall -Wextra
 CFLAGS := ${CFLAGS} -I.
 DESTDIR ?= /usr/local
 
-OBJS := $(OBJ)/tar.o
+OBJS := $(OBJ)/tar.o \
+		$(OBJ)/util.o
 
 build: $(OBJS)
 	@echo -- Creating $(LIBNAME).a
