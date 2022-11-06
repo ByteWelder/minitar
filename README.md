@@ -50,7 +50,7 @@ Reads the next entry from a `struct minitar` which should be the return value of
 
 This structure consists of the file metadata (in the `metadata` field), and a heap-allocated pointer to the file's contents (the `ptr` field), of size metadata.size + a NULL character, for convenience. This means you can use normal C string functions if you're expecting an ASCII file. Other kinds of files may have NULL characters before the end of the file, so you should assume the length of `ptr` is `metadata.size` and not `strlen(ptr)`.
 
-This pointer will be freed when calling `minitar_free_entry()`, so if you're intending to use it later, copy its contents somewhere else.
+This pointer will be freed when calling `minitar_free_entry()`, so if you're intending to use the file's contents later, copy them somewhere else.
 
 This function returns NULL on end-of-file (when all entries have been read).
 
