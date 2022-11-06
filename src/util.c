@@ -8,10 +8,15 @@
 #include <stdnoreturn.h>
 #include <string.h>
 
-noreturn void minitar_panic(const char* message)
+__attribute__((weak)) noreturn void minitar_handle_panic(const char* message)
 {
     fprintf(stderr, "minitar: %s\n", message);
     abort();
+}
+
+noreturn void minitar_panic(const char* message)
+{
+    minitar_handle_panic(message);
 }
 
 void minitar_parse_tar_header(struct tar_header* hdr, struct minitar_entry_metadata* metadata)
@@ -67,8 +72,9 @@ int minitar_validate_header(struct tar_header* hdr)
 
 int minitar_read_header(struct minitar* mp, struct tar_header* hdr)
 {
-    size_t rc = fread(hdr, sizeof *hdr, 1, mp->stream);
+    size_t rc = fread(hdr, 1, sizeof *hdr, mp->stream);
     if (rc == 0 && feof(mp->stream)) return 0;
+    if (rc < sizeof *hdr) minitar_panic("Valid tar files should be split in 512-byte blocks");
     return 1;
 }
 
