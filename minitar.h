@@ -3,10 +3,14 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+#ifdef _IN_MINITAR
 struct minitar
 {
     FILE* stream;
 };
+#else
+struct minitar;
+#endif
 
 enum minitar_file_type
 {

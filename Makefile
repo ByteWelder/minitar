@@ -6,7 +6,7 @@ SRC := src
 CC ?= gcc
 AR ?= ar
 CFLAGS ?= -O2 -Wall -Wextra
-CFLAGS := ${CFLAGS} -I.
+CFLAGS := ${CFLAGS} -I. -D_IN_MINITAR
 DESTDIR ?= /usr/local
 
 OBJS := $(OBJ)/tar.o \
