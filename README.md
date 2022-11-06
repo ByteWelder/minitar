@@ -35,8 +35,6 @@ int main(int argc, char** argv)
 
 This program will list out the files in a tar archive :)
 
-## API
-
 ## Functions
 ### minitar_open
 `struct minitar* minitar_open(const char* filename)`
