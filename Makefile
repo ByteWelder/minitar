@@ -24,7 +24,7 @@ $(OBJ)/%.o: $(SRC)/%.c
 
 install:
 	@echo -- Installing $(LIBNAME).a
-	@mkdir -p $(DESTDIR)
+	@mkdir -p $(DESTDIR)/{lib,include}
 	cp $(OUTPUT)/$(LIBNAME).a $(DESTDIR)/lib
 	cp ./minitar.h $(DESTDIR)/include
 
