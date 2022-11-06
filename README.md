@@ -36,6 +36,8 @@ int main(int argc, char** argv)
 This program will list out the files in a tar archive :)
 
 ## API
+
+## Functions
 ### minitar_open
 `struct minitar* minitar_open(const char* filename)`
 
@@ -86,6 +88,57 @@ Does the same thing as `minitar_find_by_name()`, but matches the file type inste
 Closes the tar archive file `mp` points to and frees the heap memory it was using. The pointer passed to `minitar_close()` should be the return value of a previous call to `minitar_open()`.
 
 Returns 0 on success, everything else is failure and you should check `errno`.
+
+## Types
+
+### minitar_file_type
+`enum minitar_file_type`
+
+This enum lists all supported file types:
+
+`MTAR_REGULAR`: Regular files
+
+`MTAR_BLKDEV`: Block special devices
+
+`MTAR_CHRDEV`: Character special devices
+
+`MTAR_DIRECTORY`: Directories
+
+Other file types supported in tar archives, such as FIFOs or symlinks, are not supported and minitar will throw an error when encountering one of them.
+
+### minitar_entry_metadata
+`struct minitar_entry_metadata`
+
+This structure represents an entry's metadata, with the following fields:
+
+`name`: A string representing the full path of the entry within the archive. (`char[]`)
+
+`mode`: An integer representing the permissions of the entry. (`mode_t`)
+
+`uid`: An integer representing the user ID of the entry's owner. (`uid_t`)
+
+`gid`: An integer representing the group ID of the entry's owner. (`gid_t`)
+
+`size`: An integer representing the size of the entry's contents in bytes. (`size_t`)
+
+`mtime`: A UNIX timestamp representing the last time the entry was modified. (`time_t`)
+
+`type`: An enum representing the type of the entry. (`enum minitar_file_type`)
+
+`uname`: A string representing the username of the entry's owner. (`char[]`)
+
+`gname`: A string representing the group name of the entry's owner. (`char[]`)
+
+### minitar_entry
+`struct minitar_entry`
+
+An entry in a tar archive. Fields:
+
+`metadata`: The entry's metadata. (`struct minitar_entry_metadata`)
+
+`ptr`: A pointer to the entry's contents, heap-allocated. (`char*`)
+
+More details about this structure are available in the documentation for `minitar_read_entry()`.
 
 ## License
 
