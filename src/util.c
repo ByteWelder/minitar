@@ -66,6 +66,9 @@ void minitar_parse_tar_header(struct tar_header* hdr, struct minitar_entry_metad
 
 int minitar_validate_header(struct tar_header* hdr)
 {
+    if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '1' && hdr->typeflag != '2' &&
+        hdr->typeflag != '3' && hdr->typeflag != '4' && hdr->typeflag != '5' && hdr->typeflag != '6')
+        return 0;
     return !strncmp(hdr->magic, "ustar", 5);
 }
 
@@ -73,6 +76,7 @@ int minitar_read_header(struct minitar* mp, struct tar_header* hdr)
 {
     size_t rc = fread(hdr, 1, sizeof *hdr, mp->stream);
     if (rc == 0 && feof(mp->stream)) return 0;
+    if (rc == 0 && ferror(mp->stream)) minitar_panic("Error while reading file header from tar archive");
     if (rc < sizeof *hdr) minitar_panic("Valid tar files should be split in 512-byte blocks");
     return 1;
 }
@@ -93,14 +97,22 @@ char* minitar_read_file(struct minitar_entry_metadata* metadata, struct minitar*
     size_t nread = fread(buf, 1, metadata->size, mp->stream);
     if (!nread)
     {
-        free(buf);
-        if (feof(mp->stream)) return NULL;
-        if (ferror(mp->stream)) minitar_panic("Error while reading file data from tar archive");
-        __builtin_unreachable();
+        if (feof(mp->stream))
+        {
+            free(buf);
+            return NULL;
+        }
+        if (ferror(mp->stream))
+        {
+            free(buf);
+            minitar_panic("Error while reading file data from tar archive");
+        }
     }
-
-    long rem = 512 - (nread % 512);
-    fseek(mp->stream, rem, SEEK_CUR); // move the file offset over to the start of the next block
+    else
+    {
+        long rem = 512 - (nread % 512);
+        fseek(mp->stream, rem, SEEK_CUR); // move the file offset over to the start of the next block
+    }
 
     buf[nread] = 0;
 
