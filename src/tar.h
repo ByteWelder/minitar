@@ -18,7 +18,7 @@ struct tar_header {
   char devmajor[8];
   char devminor[8];
   char prefix[155];
-  char padding[12];
+  char padding[12]; // to make the structure 512 bytes
 } __attribute__((packed));
 
 #endif

@@ -88,3 +88,25 @@ struct minitar_entry* minitar_dup_entry(struct minitar_entry* original)
     memcpy(new, original, sizeof *new);
     return new;
 }
+
+char* minitar_read_file(struct minitar_entry_metadata* metadata, struct minitar* mp)
+{
+    char* buf = malloc(metadata->size + 1);
+    if(!buf) return NULL;
+
+    size_t nread = fread(buf, 1, metadata->size, mp->stream);
+    if(!nread)
+    {
+        free(buf);
+        if(feof(mp->stream)) return NULL;
+        if(ferror(mp->stream)) minitar_panic("Error while reading file data from tar archive");
+        __builtin_unreachable();
+    }
+
+    long rem = 512 - (nread % 512);
+    fseek(mp->stream, rem, SEEK_CUR); // move the file offset over to the start of the next block
+
+    buf[nread] = 0;
+
+    return buf;
+}

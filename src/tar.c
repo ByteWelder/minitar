@@ -6,6 +6,7 @@ int minitar_read_header(struct minitar* mp, struct tar_header* hdr);
 int minitar_validate_header(struct tar_header* hdr);
 void minitar_parse_tar_header(struct tar_header* hdr, struct minitar_entry_metadata* metadata);
 struct minitar_entry* minitar_dup_entry(struct minitar_entry* original);
+char* minitar_read_file(struct minitar_entry_metadata* metadata, struct minitar* mp);
 
 struct minitar* minitar_open(const char* path)
 {
@@ -41,7 +42,9 @@ static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int*
     }
     *valid = 1;
     minitar_parse_tar_header(&hdr, &entry.metadata);
-    // FIXME: Actually read the file and place it in buf.
+    char* buf = minitar_read_file(&entry.metadata, mp);
+    if(!buf) return NULL;
+    entry.ptr = buf;
     return minitar_dup_entry(&entry);
 }
 
@@ -57,5 +60,6 @@ struct minitar_entry* minitar_read_entry(struct minitar* mp)
 
 void minitar_free_entry(struct minitar_entry* entry)
 {
-    free(entry); // FIXME: Also free the file's content, when it's placed in buf.
+    free(entry->ptr);
+    free(entry);
 }
