@@ -4,15 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-int minitar_read_header(struct minitar* mp, struct tar_header* hdr);
-int minitar_validate_header(struct tar_header* hdr);
-void minitar_parse_tar_header(struct tar_header* hdr, struct minitar_entry_metadata* metadata);
-struct minitar_entry* minitar_dup_entry(struct minitar_entry* original);
-char* minitar_read_file(struct minitar_entry_metadata* metadata, struct minitar* mp);
+int minitar_read_header(struct minitar*, struct tar_header*);
+int minitar_validate_header(struct tar_header*);
+void minitar_parse_tar_header(struct tar_header*, struct minitar_entry_metadata*);
+struct minitar_entry* minitar_dup_entry(struct minitar_entry*);
+char* minitar_read_file(struct minitar_entry_metadata*, struct minitar*);
 
-struct minitar* minitar_open(const char* path)
+struct minitar* minitar_open(const char* pathname)
 {
-    FILE* fp = fopen(path, "rb"); // On some systems, this might be necessary to read the file properly.
+    FILE* fp = fopen(pathname, "rb"); // On some systems, this might be necessary to read the file properly.
     if (!fp) return NULL;
     struct minitar* mp = malloc(sizeof(struct minitar));
     if (!mp)

@@ -37,7 +37,7 @@ The output of this example program when running it with an uncompressed tar arch
 
 ## Functions
 ### minitar_open
-`struct minitar* minitar_open(const char* filename)`
+`struct minitar* minitar_open(const char* pathname)`
 
 Opens a tar archive for reading, and returns a heap-allocated `struct minitar` which must be freed with `minitar_close()` after using it. If opening the file or allocating the struct fails, returns NULL.
 
