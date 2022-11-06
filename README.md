@@ -86,3 +86,7 @@ Does the same thing as `minitar_find_by_name()`, but matches the file type inste
 Closes the tar archive file `mp` points to and frees the heap memory it was using. The pointer passed to `minitar_close()` should be the return value of a previous call to `minitar_open()`.
 
 Returns 0 on success, everything else is failure and you should check `errno`.
+
+## License
+
+`minitar` is free and open-source software under the [BSD-2-Clause](LICENSE) license.
