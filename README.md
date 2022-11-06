@@ -59,6 +59,11 @@ This function returns NULL on end-of-file (when all entries have been read).
 
 Frees the heap-allocated `struct minitar_entry` and the file contents stored inside it. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`.
 
+### minitar_rewind
+`void minitar_rewind(struct minitar* mp)`
+
+Rewinds the `struct minitar` back to the beginning of the archive file, which means that the next call to `minitar_read_entry()` will return the first entry instead of the entry after the last read entry.
+
 ### minitar_close
 `int minitar_close(struct minitar* mp)`
 

@@ -1,3 +1,4 @@
+#define _IN_MINITAR
 #include "tar.h"
 #include "minitar.h"
 #include <stdlib.h>
@@ -60,6 +61,11 @@ struct minitar_entry* minitar_read_entry(struct minitar* mp)
         result = minitar_attempt_read_entry(mp, &valid);
     } while (!valid);
     return result;
+}
+
+void minitar_rewind(struct minitar* mp)
+{
+    rewind(mp->stream);
 }
 
 void minitar_free_entry(struct minitar_entry* entry)

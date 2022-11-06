@@ -1,9 +1,9 @@
 #ifndef MINITAR_H
 #define MINITAR_H
-#include <stdio.h>
 #include <sys/types.h>
 
 #ifdef _IN_MINITAR
+#include <stdio.h>
 struct minitar
 {
     FILE* stream;
@@ -42,6 +42,7 @@ struct minitar_entry
 struct minitar* minitar_open(const char* pathname);
 struct minitar_entry* minitar_read_entry(struct minitar* mp);
 void minitar_free_entry(struct minitar_entry* entry);
+void minitar_rewind(struct minitar* mp);
 int minitar_close(struct minitar* mp);
 
 #endif

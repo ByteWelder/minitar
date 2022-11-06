@@ -1,4 +1,5 @@
-#define _POSIX_C_SOURCE 200809L
+#define _POSIX_C_SOURCE 200809L // for strndup
+#define _IN_MINITAR
 #include "minitar.h"
 #include "tar.h"
 #include <stdarg.h>
