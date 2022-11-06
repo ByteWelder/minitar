@@ -34,3 +34,34 @@ int main(int argc, char** argv)
 ```
 
 This program will list out the files in a tar archive :)
+
+## API
+### minitar_open
+`struct minitar* minitar_open(const char* filename)`
+
+Opens a tar archive for reading, and returns a heap-allocated `struct minitar` which must be freed with `minitar_close()` after using it. If opening the file or allocating the struct fails, returns NULL.
+
+A `struct minitar` is opaque, and should only be passed to other minitar functions. You should not care about its contents.
+
+### minitar_read_entry
+`struct minitar_entry* minitar_read_entry(struct minitar* mp)`
+
+Reads the next entry from a `struct minitar` which should be the return value of a previous call to `minitar_open()`. The return value is a heap-allocated `struct minitar_entry`, which should be freed with `minitar_free_entry()` when no longer needed. 
+
+This structure consists of the file metadata (in the `metadata` field), and a heap-allocated pointer to the file's contents (the `ptr` field), of size metadata.size + a NULL character, for convenience. This means you can use normal C string functions if you're expecting an ASCII file. Other kinds of files may have NULL characters before the end of the file, so you should assume the length of `ptr` is `metadata.size` and not `strlen(ptr)`.
+
+This pointer will be freed when calling `minitar_free_entry()`, so if you're intending to use it later, copy its contents somewhere else.
+
+This function returns NULL on end-of-file (when all entries have been read).
+
+### minitar_free_entry
+`void minitar_free_entry(struct minitar_entry* entry)`
+
+Frees the heap-allocated `struct minitar_entry` and the file contents stored inside it. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`.
+
+### minitar_close
+`int minitar_close(struct minitar* mp)`
+
+Closes the tar archive file `mp` points to and frees the heap memory it was using. The pointer passed to `minitar_close()` should be the return value of a previous call to `minitar_open()`.
+
+Returns 0 on success, everything else is failure and you should check `errno`.
