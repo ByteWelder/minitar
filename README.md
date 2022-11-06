@@ -57,12 +57,28 @@ This function returns NULL on end-of-file (when all entries have been read).
 ### minitar_free_entry
 `void minitar_free_entry(struct minitar_entry* entry)`
 
-Frees the heap-allocated `struct minitar_entry` and the file contents stored inside it. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`.
+Frees the heap-allocated `struct minitar_entry` and the file contents stored inside it. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()` or `minitar_find_any_of()`.
 
 ### minitar_rewind
 `void minitar_rewind(struct minitar* mp)`
 
 Rewinds the `struct minitar` back to the beginning of the archive file, which means that the next call to `minitar_read_entry()` will return the first entry instead of the entry after the last read entry.
+
+### minitar_find_by_name
+`struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name)`
+
+Returns the first entry with a matching name, or NULL if none are found. The return value is a `struct minitar_entry`, which is heap-allocated and should be freed after use with `minitar_free_entry()`. This structure is already documented in the entry documenting `minitar_read_entry()`.
+
+This function starts searching from the current archive position, which means that to find a matching entry in the entire archive `minitar_rewind()` should be called on it first.
+
+The state of `mp` after `minitar_find_by_name()` returns is unspecified, but a successive call to `minitar_find_by_name()` will return the next matching entry, if there is one. (Calling `minitar_find_by_name()` in a loop until it returns NULL will return all matching entries.)
+
+In order to petform other minitar operations on the archive, `minitar_rewind()` should probably be called first, to get a known state.
+
+### minitar_find_any_of
+`struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type)`
+
+Does the same thing as `minitar_find_by_name()`, but matches the file type instead of the name. As with `minitar_find_by_name()`, this function starts searching from the current archive position and calling it in a loop until it returns NULL will return all matching entries.
 
 ### minitar_close
 `int minitar_close(struct minitar* mp)`

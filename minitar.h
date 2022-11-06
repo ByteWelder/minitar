@@ -43,6 +43,8 @@ struct minitar* minitar_open(const char* pathname);
 struct minitar_entry* minitar_read_entry(struct minitar* mp);
 void minitar_free_entry(struct minitar_entry* entry);
 void minitar_rewind(struct minitar* mp);
+struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name);
+struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type);
 int minitar_close(struct minitar* mp);
 
 #endif

@@ -2,6 +2,7 @@
 #include "tar.h"
 #include "minitar.h"
 #include <stdlib.h>
+#include <string.h>
 
 int minitar_read_header(struct minitar* mp, struct tar_header* hdr);
 int minitar_validate_header(struct tar_header* hdr);
@@ -72,4 +73,32 @@ void minitar_free_entry(struct minitar_entry* entry)
 {
     free(entry->ptr);
     free(entry);
+}
+
+struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name)
+{
+    struct minitar_entry* entry;
+    do {
+        entry = minitar_read_entry(mp);
+        if (entry)
+        {
+            if (!strcmp(entry->metadata.name, name)) return entry;
+            minitar_free_entry(entry);
+        }
+    } while (entry);
+    return NULL;
+}
+
+struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type)
+{
+    struct minitar_entry* entry;
+    do {
+        entry = minitar_read_entry(mp);
+        if (entry)
+        {
+            if (entry->metadata.type == type) return entry;
+            minitar_free_entry(entry);
+        }
+    } while (entry);
+    return NULL;
 }
