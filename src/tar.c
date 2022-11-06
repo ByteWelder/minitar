@@ -4,11 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+// all of these are defined in util.c
 int minitar_read_header(struct minitar*, struct tar_header*);
 int minitar_validate_header(struct tar_header*);
 void minitar_parse_tar_header(struct tar_header*, struct minitar_entry_metadata*);
 struct minitar_entry* minitar_dup_entry(struct minitar_entry*);
-char* minitar_read_file(struct minitar_entry_metadata*, struct minitar*);
+char* minitar_read_file_contents(struct minitar_entry_metadata*, struct minitar*);
 
 struct minitar* minitar_open(const char* pathname)
 {
@@ -48,7 +49,7 @@ static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int*
     }
     *valid = 1;
     minitar_parse_tar_header(&hdr, &entry.metadata);
-    char* buf = minitar_read_file(&entry.metadata, mp);
+    char* buf = minitar_read_file_contents(&entry.metadata, mp);
     if (!buf) return NULL;
     entry.ptr = buf;
     return minitar_dup_entry(&entry);

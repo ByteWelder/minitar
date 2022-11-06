@@ -89,7 +89,7 @@ struct minitar_entry* minitar_dup_entry(struct minitar_entry* original)
     return new;
 }
 
-char* minitar_read_file(struct minitar_entry_metadata* metadata, struct minitar* mp)
+char* minitar_read_file_contents(struct minitar_entry_metadata* metadata, struct minitar* mp)
 {
     char* buf = malloc(metadata->size + 1);
     if (!buf) return NULL;
