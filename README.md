@@ -138,6 +138,28 @@ An entry in a tar archive. Fields:
 
 More details about this structure are available in the documentation for `minitar_read_entry()`.
 
+## Error handling
+
+When a fatal error occurs, minitar calls the function `minitar_handle_panic()` with a message describing the error.
+The default implementation of this function prints the error message out to standard error and aborts.
+
+You might want to handle errors differently. Well, you can override the panic function! Just create a function with the following signature:
+
+`noreturn void minitar_handle_panic(const char* message)`
+
+and put your error handling code in there. This function will automatically override the default one used by minitar.
+
+This function needs to have C linkage and be unmangled. If you're using other languages, this might not be the case, for example, a C++ implementation would need the following signature:
+
+`extern "C" noreturn void minitar_handle_panic(const char* message)`
+
+and a Rust implementation would need:
+
+```
+#[no_mangle]
+pub extern "C" fn minitar_handle_panic(message: *const u8) -> !
+```
+
 ## License
 
 `minitar` is free and open-source software under the [BSD-2-Clause](LICENSE) license.
