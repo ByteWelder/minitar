@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	do {
 		entry = minitar_read_entry(mp);
 		if(entry) { 
-			printf("Found file %s\n", entry->metadata.name);
+			printf("%s\n", entry->metadata.name);
 			minitar_free_entry(entry);
 		}
 	} while(entry);
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 }
 ```
 
-This program will list out the files in a tar archive :)
+The output of this example program when running it with an uncompressed tar archive is identical to that of `tar --list -f archive.tar` with the same uncompressed archive.
 
 ## Functions
 ### minitar_open
