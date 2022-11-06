@@ -1,0 +1,12 @@
+---
+BasedOnStyle: Microsoft
+CompactNamespaces: 'false'
+FixNamespaceComments: 'false'
+NamespaceIndentation: All
+AllowShortBlocksOnASingleLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: 'true'
+PointerAlignment: Left

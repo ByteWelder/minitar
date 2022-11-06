@@ -1,6 +1,6 @@
-#include <stdlib.h>
-#include "minitar.h"
 #include "tar.h"
+#include "minitar.h"
+#include <stdlib.h>
 
 int minitar_read_header(struct minitar* mp, struct tar_header* hdr);
 int minitar_validate_header(struct tar_header* hdr);
@@ -11,9 +11,13 @@ char* minitar_read_file(struct minitar_entry_metadata* metadata, struct minitar*
 struct minitar* minitar_open(const char* path)
 {
     FILE* fp = fopen(path, "rb"); // On some systems, this might be necessary to read the file properly.
-    if(!fp) return NULL;
+    if (!fp) return NULL;
     struct minitar* mp = malloc(sizeof(struct minitar));
-    if(!mp) { fclose(fp); return NULL; }
+    if (!mp)
+    {
+        fclose(fp);
+        return NULL;
+    }
     mp->stream = fp;
     return mp;
 }
@@ -22,7 +26,7 @@ int minitar_close(struct minitar* mp)
 {
     int rc = fclose(mp->stream);
     free(mp);
-    if(rc) return rc;
+    if (rc) return rc;
     return 0;
 }
 
@@ -30,12 +34,12 @@ static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int*
 {
     struct minitar_entry entry;
     struct tar_header hdr;
-    if(!minitar_read_header(mp, &hdr))
+    if (!minitar_read_header(mp, &hdr))
     {
         *valid = 1; // we are at end-of-file
         return NULL;
     }
-    if(!minitar_validate_header(&hdr))
+    if (!minitar_validate_header(&hdr))
     {
         *valid = 0;
         return NULL;
@@ -43,7 +47,7 @@ static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int*
     *valid = 1;
     minitar_parse_tar_header(&hdr, &entry.metadata);
     char* buf = minitar_read_file(&entry.metadata, mp);
-    if(!buf) return NULL;
+    if (!buf) return NULL;
     entry.ptr = buf;
     return minitar_dup_entry(&entry);
 }
@@ -54,7 +58,7 @@ struct minitar_entry* minitar_read_entry(struct minitar* mp)
     struct minitar_entry* result;
     do {
         result = minitar_attempt_read_entry(mp, &valid);
-    } while(!valid);
+    } while (!valid);
     return result;
 }
 
