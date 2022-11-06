@@ -2,7 +2,6 @@
 #define _IN_MINITAR
 #include "minitar.h"
 #include "tar.h"
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
