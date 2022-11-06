@@ -151,7 +151,7 @@ and put your error handling code in there. This function will automatically over
 
 This function needs to have C linkage and be unmangled. If you're using other languages, this might not be the case, for example, a C++ implementation would need the following signature:
 
-`extern "C" noreturn void minitar_handle_panic(const char* message)`
+`extern "C" [[noreturn]] void minitar_handle_panic(const char* message)`
 
 and a Rust implementation would need:
 
