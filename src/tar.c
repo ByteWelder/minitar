@@ -10,7 +10,7 @@ char* minitar_read_file(struct minitar_entry_metadata* metadata, struct minitar*
 
 struct minitar* minitar_open(const char* path)
 {
-    FILE* fp = fopen(path, "r");
+    FILE* fp = fopen(path, "rb"); // On some systems, this might be necessary to read the file properly.
     if(!fp) return NULL;
     struct minitar* mp = malloc(sizeof(struct minitar));
     if(!mp) { fclose(fp); return NULL; }
