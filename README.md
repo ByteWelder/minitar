@@ -73,7 +73,7 @@ This function starts searching from the current archive position, which means th
 
 The state of `mp` after `minitar_find_by_name()` returns is unspecified, but a successive call to `minitar_find_by_name()` will return the next matching entry, if there is one. (Calling `minitar_find_by_name()` in a loop until it returns NULL will return all matching entries.)
 
-In order to petform other minitar operations on the archive, `minitar_rewind()` should probably be called first, to get a known state.
+In order to perform other minitar operations on the archive, `minitar_rewind()` should probably be called first, to get a known state.
 
 ### minitar_find_any_of
 `struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type)`
