@@ -1,5 +1,0 @@
-#cmakedefine UNSIGNED_SIZE_TYPE
-#cmakedefine UNSIGNED_TIME_TYPE
-#cmakedefine UNSIGNED_MODE_TYPE
-#cmakedefine UNSIGNED_GID_TYPE
-#cmakedefine UNSIGNED_UID_TYPE

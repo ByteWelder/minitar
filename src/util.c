@@ -1,6 +1,5 @@
 #define _POSIX_C_SOURCE 200809L // for strndup
 #define _IN_MINITAR
-#include "config.h"
 #include "minitar.h"
 #include "tar.h"
 #include <stdio.h>
@@ -8,6 +7,8 @@
 #include <stdnoreturn.h>
 #include <string.h>
 
+// Default implementation for minitar_handle_panic(). Since it's declared weak, any other definition will silently
+// override this one :)
 __attribute__((weak)) noreturn void minitar_handle_panic(const char* message)
 {
     fprintf(stderr, "minitar: %s\n", message);
@@ -28,48 +29,26 @@ void minitar_parse_tar_header(const struct tar_header* hdr, struct minitar_entry
     }
     else
     {
-        strcpy(metadata->name, hdr->prefix);
+        strncpy(metadata->name, hdr->prefix, 155);
         strcat(metadata->name, "/");
         strncat(metadata->name, hdr->name, 100);
         metadata->name[256] = '\0';
     }
 
-#ifdef UNSIGNED_MODE_TYPE
     metadata->mode = (mode_t)strtoul(hdr->mode, NULL, 8);
-#else
-    metadata->mode = (mode_t)strtol(hdr->mode, NULL, 8);
-#endif
-
-#ifdef UNSIGNED_UID_TYPE
     metadata->uid = (uid_t)strtoul(hdr->uid, NULL, 8);
-#else
-    metadata->uid = (uid_t)strtol(hdr->uid, NULL, 8);
-#endif
-
-#ifdef UNSIGNED_GID_TYPE
     metadata->gid = (gid_t)strtoul(hdr->gid, NULL, 8);
-#else
-    metadata->gid = (gid_t)strtol(hdr->uid, NULL, 8);
-#endif
 
     char* sizeptr = strndup(
         hdr->size, 12); // The hdr->size field is not null-terminated, yet strndup returns a null-terminated string.
     if (!sizeptr) minitar_panic("Failed to allocate memory to duplicate a tar header's size field");
-#ifdef UNSIGNED_SIZE_TYPE
     metadata->size = (size_t)strtoull(sizeptr, NULL, 8);
-#else
-    metadata->size = (size_t)strtoll(sizeptr, NULL, 8);
-#endif
     free(sizeptr);
 
     char* timeptr = strndup(
         hdr->mtime, 12); // The hdr->mtime field is not null-terminated, yet strndup returns a null-terminated string.
     if (!timeptr) minitar_panic("Failed to allocate memory to duplicate a tar header's mtime field");
-#ifdef UNSIGNED_TIME_TYPE
     metadata->mtime = (time_t)strtoull(timeptr, NULL, 8);
-#else
-    metadata->mtime = (time_t)strtoll(timeptr, NULL, 8);
-#endif
     free(timeptr);
 
     switch (hdr->typeflag)
