@@ -10,6 +10,7 @@ int minitar_validate_header(const struct tar_header*);
 void minitar_parse_tar_header(const struct tar_header*, struct minitar_entry_metadata*);
 struct minitar_entry* minitar_dup_entry(const struct minitar_entry*);
 char* minitar_read_file_contents(struct minitar_entry_metadata*, struct minitar*);
+size_t minitar_get_size_in_blocks(size_t);
 
 struct minitar* minitar_open(const char* pathname)
 {
@@ -47,11 +48,19 @@ static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int*
         *valid = 0;
         return NULL;
     }
+    *valid = 0;
+    if (fgetpos(mp->stream, &entry.position)) return NULL;
     *valid = 1;
     minitar_parse_tar_header(&hdr, &entry.metadata);
-    char* buf = minitar_read_file_contents(&entry.metadata, mp);
-    if (!buf) return NULL;
-    entry.ptr = buf;
+    if (entry.metadata.size)
+    {
+        size_t size_in_blocks = minitar_get_size_in_blocks(entry.metadata.size);
+        if (fseek(mp->stream, size_in_blocks,
+                  SEEK_CUR)) // move over to the next block, skipping over the file contents
+        {
+            return NULL;
+        }
+    }
     return minitar_dup_entry(&entry);
 }
 
@@ -72,7 +81,6 @@ void minitar_rewind(struct minitar* mp)
 
 void minitar_free_entry(struct minitar_entry* entry)
 {
-    free(entry->ptr);
     free(entry);
 }
 
@@ -102,4 +110,16 @@ struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_
         }
     } while (entry);
     return NULL;
+}
+
+size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max)
+{
+    if (!max) return 0;
+    fpos_t current_position;
+    if (fgetpos(mp->stream, &current_position)) return 0;
+    if (fsetpos(mp->stream, &entry->position)) return 0;
+    size_t nread = fread(buf, 1, max > entry->metadata.size ? entry->metadata.size : max, mp->stream);
+    if (ferror(mp->stream)) return 0;
+    if (fsetpos(mp->stream, &current_position)) return 0;
+    return nread;
 }

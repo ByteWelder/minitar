@@ -1,9 +1,9 @@
 #ifndef MINITAR_H
 #define MINITAR_H
+#include <stdio.h>
 #include <sys/types.h>
 
 #ifdef _IN_MINITAR
-#include <stdio.h>
 struct minitar
 {
     FILE* stream;
@@ -36,7 +36,7 @@ struct minitar_entry_metadata
 struct minitar_entry
 {
     struct minitar_entry_metadata metadata;
-    char* ptr;
+    fpos_t position;
 };
 
 #ifdef __cplusplus
@@ -51,6 +51,7 @@ extern "C"
     struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name);
     struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type);
     int minitar_close(struct minitar* mp);
+    size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max);
 
 #ifdef __cplusplus
 }

@@ -48,16 +48,16 @@ A `struct minitar` is opaque, and should only be passed to other minitar functio
 
 Reads the next entry from a `struct minitar` which should be the return value of a previous call to `minitar_open()`. The return value is a heap-allocated `struct minitar_entry`, which should be freed with `minitar_free_entry()` when no longer needed. 
 
-This structure consists of the file metadata (in the `metadata` field), and a heap-allocated pointer to the file's contents (the `ptr` field), of size metadata.size + a NULL character, for convenience. This means you can use normal C string functions if you're expecting an ASCII file. Other kinds of files may have NULL characters before the end of the file, so you should assume the length of `ptr` is `metadata.size` and not `strlen(ptr)`.
+This structure consists of the file metadata (in the `metadata` field), and other internally-used values.
 
-This pointer will be freed when calling `minitar_free_entry()`, so if you're intending to use the file's contents later, copy them somewhere else.
+To read the contents of an entry, you should allocate a buffer large enough to hold `metadata.size` bytes and pass it to `minitar_read_contents()`.
 
 This function returns NULL on end-of-file (when all entries have been read).
 
 ### minitar_free_entry
 `void minitar_free_entry(struct minitar_entry* entry)`
 
-Frees the heap-allocated `struct minitar_entry` and the file contents stored inside it. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()` or `minitar_find_any_of()`.
+Frees the heap-allocated `struct minitar_entry`. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()` or `minitar_find_any_of()`.
 
 ### minitar_rewind
 `void minitar_rewind(struct minitar* mp)`
@@ -79,6 +79,19 @@ In order to perform other minitar operations on the archive, `minitar_rewind()` 
 `struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type)`
 
 Does the same thing as `minitar_find_by_name()`, but matches the file type instead of the name. As with `minitar_find_by_name()`, this function starts searching from the current archive position and calling it in a loop until it returns NULL will return all matching entries.
+
+### minitar_read_contents
+`size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max)`
+
+Reads up to `max` bytes of an entry's contents from the archive stream `mp` and stores them into `buf`.
+
+This function can be called as many times as desired, and at any given point in time, provided both `mp` and `entry` are valid. (`mp` should be the return value of a previous call to `minitar_open()`, and `entry` the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()` or `minitar_find_any_of()`).
+
+This function returns the number of bytes read, or 0 on error. 0 might also be a successful return value (if `max` is 0 or the entry's size is 0, for example), which means `errno` should be checked to see if 0 means error or simply 0 bytes read.
+
+`minitar_read_contents()` only reads up to `metadata.size`, regardless of the value in `max`.
+
+The contents are not null-terminated. If you want null-termination (keep in mind the contents might not be ASCII and might contain null bytes before the end), just do `buf[nread] = 0;`. In that case, the value of `max` should be one less than the size of the buffer, to make sure the zero byte is not written past the end of `buf` if `max` bytes are read.
 
 ### minitar_close
 `int minitar_close(struct minitar* mp)`
@@ -134,9 +147,7 @@ An entry in a tar archive. Fields:
 
 `metadata`: The entry's metadata. (`struct minitar_entry_metadata`)
 
-`ptr`: A pointer to the entry's contents, heap-allocated. (`char*`)
-
-More details about this structure are available in the documentation for `minitar_read_entry()`.
+`position`: Reserved for internal use. (`fpos_t`)
 
 ## Error handling
 

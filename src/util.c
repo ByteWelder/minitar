@@ -39,6 +39,21 @@ void minitar_append_char(char* str, char c)
     str[len + 1] = 0;
 }
 
+size_t minitar_is_block_aligned(size_t size)
+{
+    return (size % 512 == 0);
+}
+
+size_t minitar_align_down_to_block(size_t size)
+{
+    return size - (size % 512);
+}
+
+size_t minitar_get_size_in_blocks(size_t size)
+{
+    return minitar_is_block_aligned(size) ? size : minitar_align_down_to_block(size) + 512;
+}
+
 void minitar_parse_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
 {
     if (!strlen(hdr->prefix))
@@ -110,34 +125,4 @@ struct minitar_entry* minitar_dup_entry(const struct minitar_entry* original)
     if (!new) return NULL;
     memcpy(new, original, sizeof *new);
     return new;
-}
-
-char* minitar_read_file_contents(struct minitar_entry_metadata* metadata, struct minitar* mp)
-{
-    char* buf = malloc(metadata->size + 1);
-    if (!buf) return NULL;
-
-    size_t nread = fread(buf, 1, metadata->size, mp->stream);
-    if (!nread)
-    {
-        if (feof(mp->stream))
-        {
-            free(buf);
-            return NULL;
-        }
-        if (ferror(mp->stream))
-        {
-            free(buf);
-            minitar_panic("Error while reading file data from tar archive");
-        }
-    }
-    else
-    {
-        long rem = 512 - (nread % 512);
-        fseek(mp->stream, rem, SEEK_CUR); // move the file offset over to the start of the next block
-    }
-
-    buf[nread] = 0;
-
-    return buf;
 }
