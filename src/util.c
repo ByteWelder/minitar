@@ -20,17 +20,35 @@ noreturn void minitar_panic(const char* message)
     minitar_handle_panic(message);
 }
 
+size_t minitar_strlcpy(char* dest, const char* src, size_t size)
+{
+    size_t len, full_len;
+    len = full_len = strlen(src);
+    if (size == 0) return len;
+    if (len > (size - 1)) len = size - 1;
+    for (size_t i = 0; i < len; ++i) { *((char*)dest + i) = *((const char*)src + i); }
+    dest[len] = 0;
+    return full_len;
+}
+
+void minitar_append_char(char* str, char c)
+{
+    size_t len = strlen(str);
+    str[len] = c;
+    str[len + 1] = 0;
+}
+
 void minitar_parse_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
 {
     if (!strlen(hdr->prefix))
     {
-        strncpy(metadata->name, hdr->name, 100);
+        minitar_strlcpy(metadata->name, hdr->name, 100);
         metadata->name[100] = '\0';
     }
     else
     {
-        strncpy(metadata->name, hdr->prefix, 155);
-        strcat(metadata->name, "/");
+        minitar_strlcpy(metadata->name, hdr->prefix, 155);
+        minitar_append_char(metadata->name, '/');
         strncat(metadata->name, hdr->name, 100);
         metadata->name[256] = '\0';
     }
@@ -64,8 +82,8 @@ void minitar_parse_tar_header(const struct tar_header* hdr, struct minitar_entry
     default: minitar_panic("Unknown entry type in tar header");
     }
 
-    strcpy(metadata->uname, hdr->uname);
-    strcpy(metadata->gname, hdr->gname);
+    minitar_strlcpy(metadata->uname, hdr->uname, 32);
+    minitar_strlcpy(metadata->gname, hdr->gname, 32);
 }
 
 int minitar_validate_header(const struct tar_header* hdr)
