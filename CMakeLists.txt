@@ -11,8 +11,6 @@ add_library(minitar STATIC ${SOURCES})
 
 set_target_properties(minitar PROPERTIES OUTPUT_NAME mtar)
 
-target_include_directories(minitar PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-
 if (MSVC)
     target_compile_options(minitar PRIVATE /W4 /WX)
 else()
