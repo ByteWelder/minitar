@@ -1,3 +1,4 @@
+// FIXME: What if strndup is not available? On non-POSIX, for example...
 #define _POSIX_C_SOURCE 200809L // for strndup
 #define _IN_MINITAR
 #include "minitar.h"
