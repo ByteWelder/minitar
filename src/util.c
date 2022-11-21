@@ -18,7 +18,7 @@ noreturn void minitar_panic(const char* message)
     minitar_handle_panic(message);
 }
 
-void minitar_parse_tar_header(struct tar_header* hdr, struct minitar_entry_metadata* metadata)
+void minitar_parse_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
 {
     if (!strlen(hdr->prefix))
     {
@@ -64,7 +64,7 @@ void minitar_parse_tar_header(struct tar_header* hdr, struct minitar_entry_metad
     strcpy(metadata->gname, hdr->gname);
 }
 
-int minitar_validate_header(struct tar_header* hdr)
+int minitar_validate_header(const struct tar_header* hdr)
 {
     if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '1' && hdr->typeflag != '2' &&
         hdr->typeflag != '3' && hdr->typeflag != '4' && hdr->typeflag != '5' && hdr->typeflag != '6')
@@ -81,7 +81,7 @@ int minitar_read_header(struct minitar* mp, struct tar_header* hdr)
     return 1;
 }
 
-struct minitar_entry* minitar_dup_entry(struct minitar_entry* original)
+struct minitar_entry* minitar_dup_entry(const struct minitar_entry* original)
 {
     struct minitar_entry* new = malloc(sizeof *original);
     if (!new) return NULL;
