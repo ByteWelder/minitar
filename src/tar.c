@@ -30,8 +30,7 @@ int minitar_close(struct minitar* mp)
 {
     int rc = fclose(mp->stream);
     free(mp);
-    if (rc) return rc;
-    return 0;
+    return rc;
 }
 
 static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int* valid)
