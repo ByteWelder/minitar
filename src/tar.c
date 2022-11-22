@@ -7,7 +7,7 @@
 // all of these are defined in util.c
 int minitar_read_header(struct minitar*, struct tar_header*);
 int minitar_validate_header(const struct tar_header*);
-void minitar_parse_tar_header(const struct tar_header*, struct minitar_entry_metadata*);
+void minitar_parse_metadata_from_tar_header(const struct tar_header*, struct minitar_entry_metadata*);
 struct minitar_entry* minitar_dup_entry(const struct minitar_entry*);
 char* minitar_read_file_contents(struct minitar_entry_metadata*, struct minitar*);
 size_t minitar_get_size_in_blocks(size_t);
@@ -50,7 +50,7 @@ static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int*
     *valid = 0;
     if (fgetpos(mp->stream, &entry.position)) return NULL;
     *valid = 1;
-    minitar_parse_tar_header(&hdr, &entry.metadata);
+    minitar_parse_metadata_from_tar_header(&hdr, &entry.metadata);
     if (entry.metadata.size)
     {
         size_t size_in_blocks = minitar_get_size_in_blocks(entry.metadata.size);

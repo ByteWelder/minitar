@@ -54,7 +54,7 @@ size_t minitar_get_size_in_blocks(size_t size)
     return minitar_is_block_aligned(size) ? size : minitar_align_down_to_block(size) + 512;
 }
 
-void minitar_parse_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
+void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
 {
     if (!strlen(hdr->prefix))
     {
