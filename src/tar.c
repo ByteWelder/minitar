@@ -37,19 +37,14 @@ static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int*
 {
     struct minitar_entry entry;
     struct tar_header hdr;
-    if (!minitar_read_header(mp, &hdr))
-    {
-        *valid = 1; // we are at end-of-file
-        return NULL;
-    }
+    *valid = 1;
+    if (!minitar_read_header(mp, &hdr)) return NULL;
     if (!minitar_validate_header(&hdr))
     {
         *valid = 0;
         return NULL;
     }
-    *valid = 0;
     if (fgetpos(mp->stream, &entry.position)) return NULL;
-    *valid = 1;
     minitar_parse_metadata_from_tar_header(&hdr, &entry.metadata);
     if (entry.metadata.size)
     {
@@ -69,7 +64,7 @@ struct minitar_entry* minitar_read_entry(struct minitar* mp)
     struct minitar_entry* result;
     do {
         result = minitar_attempt_read_entry(mp, &valid);
-    } while (!valid);
+    } while (!valid); // Skip over invalid entries
     return result;
 }
 
