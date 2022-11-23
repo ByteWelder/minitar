@@ -14,7 +14,9 @@ size_t minitar_get_size_in_blocks(size_t);
 
 struct minitar* minitar_open(const char* pathname)
 {
-    FILE* fp = fopen(pathname, "rb"); // On some systems, this might be necessary to read the file properly.
+    FILE* fp =
+        fopen(pathname,
+              "rb"); // On some systems, opening the file in binary mode might be necessary to read the file properly.
     if (!fp) return NULL;
     struct minitar* mp = malloc(sizeof(struct minitar));
     if (!mp)
