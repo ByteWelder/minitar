@@ -92,6 +92,20 @@ struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name)
     return NULL;
 }
 
+struct minitar_entry* minitar_find_by_path(struct minitar* mp, const char* path)
+{
+    struct minitar_entry* entry;
+    do {
+        entry = minitar_read_entry(mp);
+        if (entry)
+        {
+            if (!strcmp(entry->metadata.path, path)) return entry;
+            minitar_free_entry(entry);
+        }
+    } while (entry);
+    return NULL;
+}
+
 struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type)
 {
     struct minitar_entry* entry;

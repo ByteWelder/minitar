@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	do {
 		entry = minitar_read_entry(mp);
 		if(entry) { 
-			printf("%s\n", entry->metadata.name);
+			printf("%s\n", entry->metadata.path);
 			minitar_free_entry(entry);
 		}
 	} while(entry);
@@ -75,10 +75,16 @@ The state of `mp` after `minitar_find_by_name()` returns is unspecified, but a s
 
 In order to perform other minitar operations on the archive, `minitar_rewind()` should probably be called first, to get a known state.
 
+### minitar_find_by_path
+`struct minitar_entry* minitar_find_by_path(struct minitar* mp, const char* path)`
+
+Same as `minitar_find_by_name()`, but matches the full path inside the archive instead of the file name.
+
+
 ### minitar_find_any_of
 `struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type)`
 
-Does the same thing as `minitar_find_by_name()`, but matches the file type instead of the name. As with `minitar_find_by_name()`, this function starts searching from the current archive position and calling it in a loop until it returns NULL will return all matching entries.
+Same as `minitar_find_by_name()`, but matches the file type instead of the name. As with `minitar_find_by_name()`, this function starts searching from the current archive position and calling it in a loop until it returns NULL will return all matching entries.
 
 ### minitar_read_contents
 `size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max)`
@@ -122,7 +128,9 @@ Other file types supported in tar archives, such as FIFOs or symlinks, are not s
 
 This structure represents an entry's metadata, with the following fields:
 
-`name`: A string representing the full path of the entry within the archive. (`char[]`)
+`path`: A string representing the full path of the entry within the archive. (`char[]`)
+
+`name`: A string representing the base name of the entry (the last component of its path). (`char[]`)
 
 `mode`: An integer representing the permissions of the entry. (`mode_t`)
 

@@ -3,6 +3,7 @@
 #define _IN_MINITAR
 #include "minitar.h"
 #include "tar.h"
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
@@ -58,16 +59,24 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
 {
     if (!strlen(hdr->prefix))
     {
-        minitar_strlcpy(metadata->name, hdr->name, 100);
-        metadata->name[100] = '\0';
+        size_t size = minitar_strlcpy(metadata->path, hdr->name, 100);
+        if (size >= 100) metadata->path[100] = '\0';
+        else
+            metadata->path[size] = '\0';
     }
     else
     {
-        minitar_strlcpy(metadata->name, hdr->prefix, 155);
-        minitar_append_char(metadata->name, '/');
-        strncat(metadata->name, hdr->name, 100);
-        metadata->name[256] = '\0';
+        minitar_strlcpy(metadata->path, hdr->prefix, 155);
+        minitar_append_char(metadata->path, '/');
+        strncat(metadata->path, hdr->name, 100);
+        metadata->path[256] = '\0';
     }
+
+    char* mut_path = strdup(metadata->path);
+    if (!mut_path) minitar_panic("Failed to allocate memory");
+    char* bname = basename(mut_path);
+    minitar_strlcpy(metadata->name, bname, sizeof(metadata->name));
+    free(mut_path);
 
     metadata->mode = (mode_t)strtoul(hdr->mode, NULL, 8);
     metadata->uid = (uid_t)strtoul(hdr->uid, NULL, 8);
@@ -75,13 +84,13 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
 
     char* sizeptr = strndup(
         hdr->size, 12); // The hdr->size field is not null-terminated, yet strndup returns a null-terminated string.
-    if (!sizeptr) minitar_panic("Failed to allocate memory to duplicate a tar header's size field");
+    if (!sizeptr) minitar_panic("Failed to allocate memory");
     metadata->size = (size_t)strtoull(sizeptr, NULL, 8);
     free(sizeptr);
 
     char* timeptr = strndup(
         hdr->mtime, 12); // The hdr->mtime field is not null-terminated, yet strndup returns a null-terminated string.
-    if (!timeptr) minitar_panic("Failed to allocate memory to duplicate a tar header's mtime field");
+    if (!timeptr) minitar_panic("Failed to allocate memory");
     metadata->mtime = (time_t)strtoull(timeptr, NULL, 8);
     free(timeptr);
 
