@@ -38,7 +38,7 @@ int minitar_close(struct minitar* mp)
 // valid header, valid is set to 0 so we can try again with the next block. In any other case, valid is set to 1. This
 // helps distinguish valid return values, null pointers that should be returned to the user (for example, EOF), and
 // invalid headers where we should just try again until we find a valid one.
-static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int* valid)
+static struct minitar_entry* minitar_try_to_read_valid_entry(struct minitar* mp, int* valid)
 {
     struct minitar_entry entry;
     struct tar_header hdr;
@@ -74,7 +74,7 @@ struct minitar_entry* minitar_read_entry(struct minitar* mp)
     int valid;
     struct minitar_entry* result;
     do {
-        result = minitar_attempt_read_entry(mp, &valid);
+        result = minitar_try_to_read_valid_entry(mp, &valid);
     } while (!valid); // Skip over invalid entries
     return result;
 }
