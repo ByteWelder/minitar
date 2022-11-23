@@ -28,7 +28,7 @@ noreturn void minitar_panic(const char* message)
 // null-terminating the result. Returns the full length of src, to make it easy to check for overflows. Non-standard, so
 // we provide our own implementation.
 // https://linux.die.net/man/3/strlcpy
-size_t minitar_strlcpy(char* dest, const char* src, size_t size)
+static size_t minitar_strlcpy(char* dest, const char* src, size_t size)
 {
     size_t len, full_len; // full_len is the total length of src, len is the length we're copying
     len = full_len = strlen(src);
@@ -42,7 +42,7 @@ size_t minitar_strlcpy(char* dest, const char* src, size_t size)
 // strdup() but copies at most max bytes of orig, always null-terminating the result. This function is non-standard and
 // as such, we provide our own implementation, to be as portable as possible.
 // https://linux.die.net/man/3/strndup
-char* minitar_strndup(const char* orig, size_t max)
+static char* minitar_strndup(const char* orig, size_t max)
 {
     size_t len = strnlen(orig, max);
     char* ptr =
@@ -53,7 +53,7 @@ char* minitar_strndup(const char* orig, size_t max)
 }
 
 // strcat, but for characters :)
-void minitar_append_char(char* str, char c)
+static void minitar_append_char(char* str, char c)
 {
     size_t len = strlen(str);
     str[len] = c;
