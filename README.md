@@ -1,6 +1,6 @@
 # minitar
 
-Tiny C library to interact with tar archives
+Tiny and easy-to-use C library to parse tar (specifically, the newer USTAR variant, which is the one pretty much everybody uses) archives
 
 ## Example
 
@@ -34,6 +34,10 @@ int main(int argc, char** argv)
 ```
 
 The output of this example program when running it with an uncompressed tar archive is identical to that of `tar --list -f archive.tar` with the same uncompressed archive.
+
+## Project structure
+
+The user-facing API (functions defined in `minitar.h` and documented in this README) is implemented in `src/tar.c`. Utility and internally-used functions live in `src/util.c`.
 
 ## Functions
 ### minitar_open
