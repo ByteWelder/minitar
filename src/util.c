@@ -60,19 +60,19 @@ void minitar_append_char(char* str, char c)
     str[len + 1] = 0;
 }
 
-size_t minitar_is_block_aligned(size_t size)
+static size_t minitar_is_aligned_to_block_size(size_t size)
 {
     return (size % 512 == 0);
 }
 
-size_t minitar_align_down_to_block(size_t size)
+static size_t minitar_align_down_to_block_size(size_t size)
 {
     return size - (size % 512);
 }
 
-size_t minitar_get_size_in_blocks(size_t size)
+size_t minitar_align_up_to_block_size(size_t size)
 {
-    return minitar_is_block_aligned(size) ? size : minitar_align_down_to_block(size) + 512;
+    return minitar_is_aligned_to_block_size(size) ? size : minitar_align_down_to_block_size(size) + 512;
 }
 
 void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
@@ -157,6 +157,7 @@ int minitar_read_header(struct minitar* mp, struct tar_header* hdr)
     return 1;
 }
 
+// Create a heap-allocated copy of an entry on the stack.
 struct minitar_entry* minitar_dup_entry(const struct minitar_entry* original)
 {
     struct minitar_entry* new = malloc(sizeof *original);

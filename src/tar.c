@@ -10,7 +10,7 @@ int minitar_validate_header(const struct tar_header*);
 void minitar_parse_metadata_from_tar_header(const struct tar_header*, struct minitar_entry_metadata*);
 struct minitar_entry* minitar_dup_entry(const struct minitar_entry*);
 char* minitar_read_file_contents(struct minitar_entry_metadata*, struct minitar*);
-size_t minitar_get_size_in_blocks(size_t);
+size_t minitar_align_up_to_block_size(size_t);
 
 struct minitar* minitar_open(const char* pathname)
 {
@@ -35,28 +35,38 @@ int minitar_close(struct minitar* mp)
     return rc;
 }
 
+// Try to read a valid header, and construct an entry from it. If the 512-byte block at the current read offset is not a
+// valid header, valid is set to 0 so we can try again with the next block. In any other case, valid is set to 1. This
+// helps distinguish valid return values, null pointers that should be returned to the user (for example, EOF), and
+// invalid headers where we should just try again until we find a valid one.
 static struct minitar_entry* minitar_attempt_read_entry(struct minitar* mp, int* valid)
 {
     struct minitar_entry entry;
     struct tar_header hdr;
     *valid = 1;
+
     if (!minitar_read_header(mp, &hdr)) return NULL;
     if (!minitar_validate_header(&hdr))
     {
         *valid = 0;
         return NULL;
     }
+
+    // Fetch the current read position (which is currently pointing to the start of the entry's contents), so we can
+    // return back to it when reading the contents of this entry using minitar_read_contents().
     if (fgetpos(mp->stream, &entry.position)) return NULL;
+
     minitar_parse_metadata_from_tar_header(&hdr, &entry.metadata);
     if (entry.metadata.size)
     {
-        size_t size_in_blocks = minitar_get_size_in_blocks(entry.metadata.size);
-        if (fseek(mp->stream, size_in_blocks,
+        size_t size_in_archive = minitar_align_up_to_block_size(entry.metadata.size);
+        if (fseek(mp->stream, size_in_archive,
                   SEEK_CUR)) // move over to the next block, skipping over the file contents
         {
             return NULL;
         }
     }
+
     return minitar_dup_entry(&entry);
 }
 
