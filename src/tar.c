@@ -9,7 +9,6 @@ int minitar_read_header(struct minitar*, struct tar_header*);
 int minitar_validate_header(const struct tar_header*);
 void minitar_parse_metadata_from_tar_header(const struct tar_header*, struct minitar_entry_metadata*);
 struct minitar_entry* minitar_dup_entry(const struct minitar_entry*);
-char* minitar_read_file_contents(struct minitar_entry_metadata*, struct minitar*);
 size_t minitar_align_up_to_block_size(size_t);
 
 struct minitar* minitar_open(const char* pathname)
