@@ -141,7 +141,10 @@ size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, ch
     // Move to the position stored in the entry
     if (fsetpos(mp->stream, &entry->position)) return 0;
 
-    size_t nread = fread(buf, 1, max > entry->metadata.size ? entry->metadata.size : max, mp->stream);
+    // We refuse to read more than the size indicated by the archive
+    if (max > entry->metadata.size) max = entry->metadata.size;
+
+    size_t nread = fread(buf, 1, max, mp->stream);
     if (ferror(mp->stream)) return 0;
 
     // Restore the current position
