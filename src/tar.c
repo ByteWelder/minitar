@@ -136,10 +136,17 @@ size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, ch
 {
     if (!max) return 0;
     fpos_t current_position;
+
+    // Save the current position
     if (fgetpos(mp->stream, &current_position)) return 0;
+    // Move to the position stored in the entry
     if (fsetpos(mp->stream, &entry->position)) return 0;
+
     size_t nread = fread(buf, 1, max > entry->metadata.size ? entry->metadata.size : max, mp->stream);
     if (ferror(mp->stream)) return 0;
+
+    // Restore the current position
     if (fsetpos(mp->stream, &current_position)) return 0;
+
     return nread;
 }
