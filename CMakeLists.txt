@@ -9,6 +9,8 @@ set(SOURCES
 
 add_library(minitar STATIC ${SOURCES})
 
+target_include_directories(minitar PUBLIC ${CMAKE_CURRENT_LIST_DIR}) # for minitar.h
+
 set_target_properties(minitar PROPERTIES OUTPUT_NAME mtar)
 
 if (MSVC)
