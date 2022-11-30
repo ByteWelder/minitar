@@ -119,13 +119,9 @@ This enum lists all supported file types:
 
 `MTAR_REGULAR`: Regular files
 
-`MTAR_BLKDEV`: Block special devices
-
-`MTAR_CHRDEV`: Character special devices
-
 `MTAR_DIRECTORY`: Directories
 
-Other file types supported in tar archives, such as FIFOs or symlinks, are not supported and minitar will throw an error when encountering one of them.
+Other file types supported in tar archives, such as block/character devices, FIFOs, or symlinks, are not supported and minitar will throw an error when encountering one of them.
 
 ### minitar_entry_metadata
 `struct minitar_entry_metadata`

@@ -15,8 +15,6 @@ struct minitar;
 enum minitar_file_type
 {
     MTAR_REGULAR,
-    MTAR_CHRDEV,
-    MTAR_BLKDEV,
     MTAR_DIRECTORY
 };
 
