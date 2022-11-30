@@ -50,8 +50,8 @@ extern "C"
     struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name);
     struct minitar_entry* minitar_find_by_path(struct minitar* mp, const char* path);
     struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type);
-    int minitar_close(struct minitar* mp);
     size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max);
+    int minitar_close(struct minitar* mp);
 
 #ifdef __cplusplus
 }
