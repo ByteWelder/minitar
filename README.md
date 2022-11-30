@@ -69,7 +69,7 @@ This function returns NULL on end-of-file (when all entries have been read).
 ### minitar_free_entry
 `void minitar_free_entry(struct minitar_entry* entry)`
 
-Frees the heap-allocated `struct minitar_entry`. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()` or `minitar_find_any_of()`.
+Frees the heap-allocated `struct minitar_entry`. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()`, `minitar_find_by_path()` or `minitar_find_any_of()`.
 
 ### minitar_rewind
 `void minitar_rewind(struct minitar* mp)`
@@ -103,7 +103,7 @@ Same as `minitar_find_by_name()`, but matches the file type instead of the name.
 
 Reads up to `max` bytes of an entry's contents from the archive stream `mp` and stores them into `buf`.
 
-This function can be called as many times as desired, and at any given point in time, provided both `mp` and `entry` are valid. (`mp` should be the return value of a previous call to `minitar_open()`, and `entry` the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()` or `minitar_find_any_of()`).
+This function can be called as many times as desired, and at any given point in time, provided both `mp` and `entry` are valid. (`mp` should be the return value of a previous call to `minitar_open()`, and `entry` the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()`, `minitar_find_by_path()` or `minitar_find_any_of()`).
 
 This function returns the number of bytes read, or 0 on error. 0 might also be a successful return value (if `max` is 0 or the entry's size is 0, for example), which means `errno` should be checked to see if 0 means error or simply 0 bytes read.
 
