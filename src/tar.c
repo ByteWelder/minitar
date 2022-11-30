@@ -134,6 +134,8 @@ struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_
 size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max)
 {
     if (!max) return 0;
+    if (!entry->metadata.size) return 0;
+
     fpos_t current_position;
 
     // Save the current position
