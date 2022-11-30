@@ -78,12 +78,9 @@ size_t minitar_align_up_to_block_size(size_t size)
 void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
 {
     if (!strlen(hdr->prefix)) // If prefix is null, the full path is only the "name" field of the tar header.
-    {
-        size_t size = minitar_strlcpy(metadata->path, hdr->name, 100);
-        if (size >= 100) metadata->path[100] = '\0';
-        else
-            metadata->path[size] = '\0';
-    }
+        minitar_strlcpy(
+            metadata->path, hdr->name,
+            101); // We use 101 instead of 100 so that we copy the full "name" field even if it is not null-terminated.
     else // Construct the path by first taking the "prefix" field, then adding a slash, then concatenating the "name"
          // field.
     {
