@@ -81,6 +81,17 @@ size_t minitar_align_up_to_block_size(size_t size)
     return minitar_is_aligned_to_block_size(size) ? size : minitar_align_down_to_block_size(size) + 512;
 }
 
+static char* minitar_get_basename(const char* path)
+{
+    char* copy = minitar_strdup(path);
+    if (!copy) minitar_panic("Failed to allocate memory");
+    char* base_name = basename(copy);
+    char* base_name_copy = minitar_strdup(base_name);
+    if (!base_name_copy) minitar_panic("Failed to allocate memory");
+    free(copy);
+    return base_name_copy;
+}
+
 void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
 {
     if (!strlen(hdr->prefix)) // If prefix is null, the full path is only the "name" field of the tar header.
@@ -96,14 +107,9 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
         metadata->path[256] = '\0';
     }
 
-    char* mut_path =
-        minitar_strdup(metadata->path); // basename modifies the string passed to it, so we need to make a copy.
-    if (!mut_path) minitar_panic("Failed to allocate memory");
-
-    char* bname = basename(mut_path);
-
+    char* bname = minitar_get_basename(metadata->path);
     minitar_strlcpy(metadata->name, bname, sizeof(metadata->name));
-    free(mut_path);
+    free(bname);
 
     // Numeric fields in tar archives are stored as octal-encoded ASCII strings. Weird decision (supposedly for
     // portability), which means we have to parse these strings (the size and mtime fields aren't even null-terminated!)
