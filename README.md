@@ -4,7 +4,7 @@ Tiny and easy-to-use C library to parse tar (specifically, the newer [USTAR](htt
 
 No third-party dependencies, only a minimally capable standard C library (file IO, number parsing, malloc() and friends, string functions). 
 
-Aims to be as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [strndup](https://linux.die.net/man/3/strndup)), but that still needs some work (minitar still depends on some POSIX functions, such as [basename](https://linux.die.net/man/3/basename) (not present on Windows))).
+Aims to be as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [strndup](https://linux.die.net/man/3/strndup)), but that still needs some work (minitar still depends on some POSIX functions, such as [basename](https://linux.die.net/man/3/basename) (not present on Windows)).
 
 Very minimal and bloat-free, currently less than 500 lines :)
 
