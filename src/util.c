@@ -7,10 +7,6 @@
 #include <stdnoreturn.h>
 #include <string.h>
 
-#ifdef _MSC_VER
-#define strdup(p) _strdup(p)
-#endif
-
 // Default implementation for minitar_handle_panic(). Since it's declared weak, any other definition will silently
 // override this one :)
 __attribute__((weak)) noreturn void minitar_handle_panic(const char* message)
@@ -47,6 +43,16 @@ static char* minitar_strndup(const char* orig, size_t max)
     size_t len = strnlen(orig, max);
     char* ptr =
         calloc(len + 1, 1); // Use calloc so everything is automatically zeroed and we get a null-terminator for free :)
+    if (!ptr) return NULL;
+    for (size_t i = 0; i < len; ++i) { *(ptr + i) = *(orig + i); }
+    return ptr;
+}
+
+// Our own replacement for strdup().
+static char* minitar_strdup(const char* orig)
+{
+    size_t len = strlen(orig);
+    char* ptr = calloc(len + 1, 1);
     if (!ptr) return NULL;
     for (size_t i = 0; i < len; ++i) { *(ptr + i) = *(orig + i); }
     return ptr;
@@ -90,7 +96,8 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
         metadata->path[256] = '\0';
     }
 
-    char* mut_path = strdup(metadata->path); // basename modifies the string passed to it, so we need to make a copy.
+    char* mut_path =
+        minitar_strdup(metadata->path); // basename modifies the string passed to it, so we need to make a copy.
     if (!mut_path) minitar_panic("Failed to allocate memory");
 
     char* bname = basename(mut_path);
