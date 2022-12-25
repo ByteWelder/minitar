@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8..3.22)
 
-project(minitar LANGUAGES C VERSION 1.2.0)
+project(minitar LANGUAGES C VERSION 1.2.1)
 
 set(SOURCES
     src/tar.c

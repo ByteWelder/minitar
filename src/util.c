@@ -1,7 +1,6 @@
 #define _IN_MINITAR
 #include "minitar.h"
 #include "tar.h"
-#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
@@ -49,6 +48,7 @@ static char* minitar_strndup(const char* orig, size_t max)
 }
 
 // Our own replacement for strdup().
+// https://linux.die.net/man/3/strdup
 static char* minitar_strdup(const char* orig)
 {
     size_t len = strlen(orig);
@@ -56,6 +56,31 @@ static char* minitar_strdup(const char* orig)
     if (!ptr) return NULL;
     for (size_t i = 0; i < len; ++i) { *(ptr + i) = *(orig + i); }
     return ptr;
+}
+
+static char dot[] = ".";
+
+// POSIX function to extract the basename from a path. Not present on non-POSIX, but since paths inside a tar archive
+// are always POSIX (I believe?), we can use a replacement that does exactly the same thing as the original basename().
+// https://linux.die.net/man/3/basename
+static char* minitar_basename(char* path)
+{
+    // If path is NULL, or the string's length is 0, return .
+    if (!path) return dot;
+    size_t len = strlen(path);
+    if (!len) return dot;
+
+    // Strip trailing slashes.
+    char* it = path + len - 1;
+    while (*it == '/' && it != path) { it--; }
+    *(it + 1) = 0;
+    if (it == path) return path;
+
+    // Return path from the first character if there are no more slashes, or from the first character after the last
+    // slash.
+    char* beg = strrchr(path, '/');
+    if (!beg) return path;
+    return beg + 1;
 }
 
 // strcat, but for characters :)
@@ -81,15 +106,16 @@ size_t minitar_align_up_to_block_size(size_t size)
     return minitar_is_aligned_to_block_size(size) ? size : minitar_align_down_to_block_size(size) + 512;
 }
 
-static char* minitar_get_basename(const char* path)
+static void minitar_parse_basename(const char* path, char* out, size_t max)
 {
     char* copy = minitar_strdup(path);
     if (!copy) minitar_panic("Failed to allocate memory");
-    char* base_name = basename(copy);
-    char* base_name_copy = minitar_strdup(base_name);
-    if (!base_name_copy) minitar_panic("Failed to allocate memory");
+
+    char* bname = minitar_basename(copy);
+
+    minitar_strlcpy(out, bname, max);
+
     free(copy);
-    return base_name_copy;
 }
 
 void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
@@ -107,9 +133,7 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
         metadata->path[256] = '\0';
     }
 
-    char* bname = minitar_get_basename(metadata->path);
-    minitar_strlcpy(metadata->name, bname, sizeof(metadata->name));
-    free(bname);
+    minitar_parse_basename(metadata->path, metadata->name, sizeof(metadata->name));
 
     // Numeric fields in tar archives are stored as octal-encoded ASCII strings. Weird decision (supposedly for
     // portability), which means we have to parse these strings (the size and mtime fields aren't even null-terminated!)
