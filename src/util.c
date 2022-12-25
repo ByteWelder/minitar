@@ -1,4 +1,3 @@
-#define _IN_MINITAR
 #include "minitar.h"
 #include "tar.h"
 #include <stdio.h>
@@ -182,13 +181,4 @@ int minitar_read_header(struct minitar* mp, struct tar_header* hdr)
     if (rc == 0 && ferror(mp->stream)) minitar_panic("Error while reading file header from tar archive");
     if (rc < sizeof *hdr) minitar_panic("Valid tar files should be split in 512-byte blocks");
     return 1;
-}
-
-// Create a heap-allocated copy of an entry on the stack.
-struct minitar_entry* minitar_dup_entry(const struct minitar_entry* original)
-{
-    struct minitar_entry* new = malloc(sizeof *original);
-    if (!new) return NULL;
-    memcpy(new, original, sizeof *new);
-    return new;
 }

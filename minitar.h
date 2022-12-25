@@ -3,14 +3,10 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#ifdef _IN_MINITAR
 struct minitar
 {
     FILE* stream;
 };
-#else
-struct minitar;
-#endif
 
 enum minitar_file_type
 {
@@ -43,13 +39,12 @@ extern "C"
 {
 #endif
 
-    struct minitar* minitar_open(const char* pathname);
-    struct minitar_entry* minitar_read_entry(struct minitar* mp);
-    void minitar_free_entry(struct minitar_entry* entry);
+    int minitar_open(const char* pathname, struct minitar* out);
+    int minitar_read_entry(struct minitar* mp, struct minitar_entry* out);
     void minitar_rewind(struct minitar* mp);
-    struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name);
-    struct minitar_entry* minitar_find_by_path(struct minitar* mp, const char* path);
-    struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type);
+    int minitar_find_by_name(struct minitar* mp, const char* name, struct minitar_entry* out);
+    int minitar_find_by_path(struct minitar* mp, const char* path, struct minitar_entry* out);
+    int minitar_find_any_of(struct minitar* mp, enum minitar_file_type type, struct minitar_entry* out);
     size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max);
     int minitar_close(struct minitar* mp);
 

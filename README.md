@@ -21,21 +21,19 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Usage: %s [file]\n", argv[0]);
 		return 1;
 	}
-	struct minitar* mp = minitar_open(argv[1]);
-	if(!mp)
+	struct minitar mp;
+	if(minitar_open(argv[1], &mp) != 0)
 	{
 		perror(argv[1]);
 		return 1;
 	}
-	struct minitar_entry* entry;
+	struct minitar_entry entry;
 	do {
-		entry = minitar_read_entry(mp);
-		if(entry) { 
-			printf("%s\n", entry->metadata.path);
-			minitar_free_entry(entry);
-		}
-	} while(entry);
-	minitar_close(mp);
+		if(minitar_read_entry(&mp, &entry) == 0) { 
+			printf("%s\n", entry.metadata.path);
+		} else break;
+	} while(true);
+	minitar_close(&mp);
 }
 ```
 
@@ -47,27 +45,20 @@ The user-facing API (functions defined in `minitar.h` and documented in this REA
 
 ## Functions
 ### minitar_open
-`struct minitar* minitar_open(const char* pathname)`
+`int minitar_open(const char* pathname, struct minitar* mp)`
 
-Opens a tar archive for reading, and returns a heap-allocated `struct minitar` which must be freed with `minitar_close()` after using it. If opening the file or allocating the struct fails, returns NULL.
-
-A `struct minitar` is opaque, and should only be passed to other minitar functions. You should not care about its contents.
+Initializes the caller-provided `mp` structure by opening the archive pointed to by `pathname` for reading. Returns 0 on success, anything else is failure.
 
 ### minitar_read_entry
-`struct minitar_entry* minitar_read_entry(struct minitar* mp)`
+`int minitar_read_entry(struct minitar* mp, struct minitar_entry* out)`
 
-Reads the next entry from a `struct minitar` which should be the return value of a previous call to `minitar_open()`. The return value is a heap-allocated `struct minitar_entry`, which should be freed with `minitar_free_entry()` when no longer needed. 
+Reads the next entry from a `struct minitar` which should be initialized by a previous call to `minitar_open()` and stores the result in `out`.
 
-This structure consists of the file metadata (in the `metadata` field), and other internally-used values.
+The `minitar_entry` structure consists of the file metadata (in the `metadata` field), and other internally-used values.
 
 To read the contents of an entry, you should allocate a buffer large enough to hold `metadata.size` bytes and pass it to `minitar_read_contents()`.
 
-This function returns NULL on end-of-file (when all entries have been read).
-
-### minitar_free_entry
-`void minitar_free_entry(struct minitar_entry* entry)`
-
-Frees the heap-allocated `struct minitar_entry`. The pointer passed to `minitar_free_entry()` should be the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()`, `minitar_find_by_path()` or `minitar_find_any_of()`.
+This function returns 0 on success and -1 on end-of-file (when all entries have been read).
 
 ### minitar_rewind
 `void minitar_rewind(struct minitar* mp)`
@@ -75,26 +66,26 @@ Frees the heap-allocated `struct minitar_entry`. The pointer passed to `minitar_
 Rewinds the `struct minitar` back to the beginning of the archive file, which means that the next call to `minitar_read_entry()` will return the first entry instead of the entry after the last read entry.
 
 ### minitar_find_by_name
-`struct minitar_entry* minitar_find_by_name(struct minitar* mp, const char* name)`
+`int minitar_find_by_name(struct minitar* mp, const char* name, struct minitar_entry* out)`
 
-Returns the first entry with a matching name, or NULL if none are found. The return value is a `struct minitar_entry`, which is heap-allocated and should be freed after use with `minitar_free_entry()`. This structure is already documented in the entry documenting `minitar_read_entry()`.
+Stores the first entry with a matching name in `out` and returns 0, or non-zero if none are found. In this case, the state of `out` is unspecified and might have been changed by the function.
 
 This function starts searching from the current archive position, which means that to find a matching entry in the entire archive `minitar_rewind()` should be called on it first.
 
-The state of `mp` after `minitar_find_by_name()` returns is unspecified, but a successive call to `minitar_find_by_name()` will return the next matching entry, if there is one. (Calling `minitar_find_by_name()` in a loop until it returns NULL will return all matching entries.)
+The state of `mp` after `minitar_find_by_name()` returns is unspecified, but a successive call to `minitar_find_by_name()` will find the next matching entry, if there is one. (Calling `minitar_find_by_name()` in a loop until it returns non-zero will return all matching entries.)
 
 In order to perform other minitar operations on the archive, `minitar_rewind()` should probably be called first, to get a known state.
 
 ### minitar_find_by_path
-`struct minitar_entry* minitar_find_by_path(struct minitar* mp, const char* path)`
+`int minitar_find_by_path(struct minitar* mp, const char* path, struct minitar_entry* out)`
 
 Same as `minitar_find_by_name()`, but matches the full path inside the archive instead of the file name.
 
 
 ### minitar_find_any_of
-`struct minitar_entry* minitar_find_any_of(struct minitar* mp, enum minitar_file_type type)`
+`int minitar_find_any_of(struct minitar* mp, enum minitar_file_type type, struct minitar_entry* out)`
 
-Same as `minitar_find_by_name()`, but matches the file type instead of the name. As with `minitar_find_by_name()`, this function starts searching from the current archive position and calling it in a loop until it returns NULL will return all matching entries.
+Same as `minitar_find_by_name()`, but matches the file type instead of the name. As with `minitar_find_by_name()`, this function starts searching from the current archive position and calling it in a loop until it returns -1 will find all matching entries.
 
 ### minitar_read_contents
 `size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max)`
@@ -112,7 +103,7 @@ The contents are not null-terminated. If you want null-termination (keep in mind
 ### minitar_close
 `int minitar_close(struct minitar* mp)`
 
-Closes the tar archive file `mp` points to and frees the heap memory it was using. The pointer passed to `minitar_close()` should be the return value of a previous call to `minitar_open()`.
+Closes the tar archive file `mp` points to. The pointer passed to `minitar_close()` should be the return value of a previous call to `minitar_open()`.
 
 Returns 0 on success, everything else is failure and you should check `errno`.
 
