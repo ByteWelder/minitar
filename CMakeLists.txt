@@ -13,10 +13,13 @@ target_include_directories(minitar PUBLIC ${CMAKE_CURRENT_LIST_DIR}) # for minit
 
 set_target_properties(minitar PROPERTIES OUTPUT_NAME mtar)
 
+set_target_properties(minitar PROPERTIES C_STANDARD 11)
+set_target_properties(minitar PROPERTIES C_STANDARD_REQUIRED ON)
+
 if (MSVC)
     target_compile_options(minitar PRIVATE /W4 /WX)
 else()
-    target_compile_options(minitar PRIVATE -Wall -Wextra -pedantic -Werror)
+    target_compile_options(minitar PRIVATE -Wall -Wextra -pedantic -Werror -ansi)
 endif()
 
 install(TARGETS minitar DESTINATION lib)
