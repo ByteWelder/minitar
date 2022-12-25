@@ -58,17 +58,6 @@ static char* minitar_strndup(const char* orig, size_t max)
     return ptr;
 }
 
-// Our own replacement for strdup().
-// https://linux.die.net/man/3/strdup
-static char* minitar_strdup(const char* orig)
-{
-    size_t len = strlen(orig);
-    char* ptr = calloc(len + 1, 1);
-    if (!ptr) return NULL;
-    for (size_t i = 0; i < len; ++i) { *(ptr + i) = *(orig + i); }
-    return ptr;
-}
-
 static char dot[] = ".";
 
 // POSIX function to extract the basename from a path. Not present on non-POSIX, but since paths inside a tar archive
@@ -119,14 +108,13 @@ size_t minitar_align_up_to_block_size(size_t size)
 
 static void minitar_parse_basename(const char* path, char* out, size_t max)
 {
-    char* copy = minitar_strdup(path);
-    if (!copy) minitar_panic("Failed to allocate memory");
+    static char mutable_path_copy[512];
 
-    char* bname = minitar_basename(copy);
+    minitar_strlcpy(mutable_path_copy, path, sizeof(mutable_path_copy));
+
+    char* bname = minitar_basename(mutable_path_copy);
 
     minitar_strlcpy(out, bname, max);
-
-    free(copy);
 }
 
 void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct minitar_entry_metadata* metadata)
@@ -153,6 +141,8 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
     metadata->mode = (mode_t)strtoul(hdr->mode, NULL, 8);
     metadata->uid = (uid_t)strtoul(hdr->uid, NULL, 8);
     metadata->gid = (gid_t)strtoul(hdr->gid, NULL, 8);
+
+    // FIXME: Maybe avoid heap allocations (strndup) for simply parsing non-null-terminated fields?
 
     char* sizeptr = minitar_strndup(
         hdr->size, 12); // The hdr->size field is not null-terminated, yet strndup returns a null-terminated string.
