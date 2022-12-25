@@ -45,19 +45,6 @@ static size_t minitar_strlcpy(char* dest, const char* src, size_t size)
     return full_len;
 }
 
-// strdup() but copies at most max bytes of orig, always null-terminating the result. This function is non-standard and
-// as such, we provide our own implementation, to be as portable as possible.
-// https://linux.die.net/man/3/strndup
-static char* minitar_strndup(const char* orig, size_t max)
-{
-    size_t len = strnlen(orig, max);
-    char* ptr =
-        calloc(len + 1, 1); // Use calloc so everything is automatically zeroed and we get a null-terminator for free :)
-    if (!ptr) return NULL;
-    for (size_t i = 0; i < len; ++i) { *(ptr + i) = *(orig + i); }
-    return ptr;
-}
-
 static char dot[] = ".";
 
 // POSIX function to extract the basename from a path. Not present on non-POSIX, but since paths inside a tar archive
@@ -99,6 +86,17 @@ static size_t minitar_is_aligned_to_block_size(size_t size)
 static size_t minitar_align_down_to_block_size(size_t size)
 {
     return size - (size % 512);
+}
+
+// Return a static string formed by 'size' bytes copied from str, and a null terminator. This function is useful for
+// when you have a fixed-size field without a null-terminator, and you need a null-terminated string to pass to a
+// library function. The pointer returned WILL be overwritten by subsequent calls to this function.
+static char* minitar_static_dup(const char* str, size_t size)
+{
+    static char result[1024];
+    memcpy(result, str, size);
+    result[size] = 0;
+    return result;
 }
 
 size_t minitar_align_up_to_block_size(size_t size)
@@ -144,17 +142,11 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
 
     // FIXME: Maybe avoid heap allocations (strndup) for simply parsing non-null-terminated fields?
 
-    char* sizeptr = minitar_strndup(
-        hdr->size, 12); // The hdr->size field is not null-terminated, yet strndup returns a null-terminated string.
-    if (!sizeptr) minitar_panic("Failed to allocate memory");
+    char* sizeptr = minitar_static_dup(hdr->size, 12);
     metadata->size = (size_t)strtoull(sizeptr, NULL, 8);
-    free(sizeptr);
 
-    char* timeptr = minitar_strndup(
-        hdr->mtime, 12); // The hdr->mtime field is not null-terminated, yet strndup returns a null-terminated string.
-    if (!timeptr) minitar_panic("Failed to allocate memory");
+    char* timeptr = minitar_static_dup(hdr->mtime, 12);
     metadata->mtime = (time_t)strtoull(timeptr, NULL, 8);
-    free(timeptr);
 
     // The type is stored as a character instead of an integer.
 
