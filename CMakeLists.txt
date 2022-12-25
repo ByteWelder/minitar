@@ -19,7 +19,7 @@ set_target_properties(minitar PROPERTIES C_STANDARD_REQUIRED ON)
 if (MSVC)
     target_compile_options(minitar PRIVATE /W4 /WX)
 else()
-    target_compile_options(minitar PRIVATE -Wall -Wextra -pedantic -Werror -ansi)
+    target_compile_options(minitar PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
 
 install(TARGETS minitar DESTINATION lib)

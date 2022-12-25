@@ -3,10 +3,15 @@
 #include "tar.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdnoreturn.h>
 #include <string.h>
 
-#ifndef _MSC_VER
+#ifndef __TINYC__
+#include <stdnoreturn.h>
+#else
+#define noreturn _Noreturn
+#endif
+
+#if !defined(_MSC_VER) && !defined(__TINYC__)
 #define WEAK __attribute__((weak))
 #else
 #define WEAK
