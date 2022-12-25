@@ -6,9 +6,15 @@
 #include <stdnoreturn.h>
 #include <string.h>
 
+#ifndef _MSC_VER
+#define WEAK __attribute__((weak))
+#else
+#define WEAK
+#endif
+
 // Default implementation for minitar_handle_panic(). Since it's declared weak, any other definition will silently
 // override this one :)
-__attribute__((weak)) noreturn void minitar_handle_panic(const char* message)
+WEAK noreturn void minitar_handle_panic(const char* message)
 {
     fprintf(stderr, "minitar: %s\n", message);
     abort();
