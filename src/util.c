@@ -168,9 +168,13 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
 
 int minitar_validate_header(const struct tar_header* hdr)
 {
+#ifdef MINITAR_IGNORE_UNSUPPORTED_TYPES
+    if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '5') return 0;
+#else
     if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '1' && hdr->typeflag != '2' &&
         hdr->typeflag != '3' && hdr->typeflag != '4' && hdr->typeflag != '5' && hdr->typeflag != '6')
         return 0;
+#endif
     return !strncmp(hdr->magic, "ustar", 5);
 }
 

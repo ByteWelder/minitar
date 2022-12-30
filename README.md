@@ -118,7 +118,7 @@ This enum lists all supported file types:
 
 `MTAR_DIRECTORY`: Directories
 
-Other file types supported in tar archives, such as block/character devices, FIFOs, or symlinks, are not supported and minitar will throw an error when encountering one of them.
+Other file types supported in tar archives, such as block/character devices, FIFOs, or symlinks, are not supported and minitar will throw an error when encountering one of them. This behavior can be controlled by passing `-DMINITAR_IGNORE_UNSUPPORTED_TYPES=ON` to CMake when configuring, which will make minitar silently ignore such entries instead of panicking.
 
 ### minitar_entry_metadata
 `struct minitar_entry_metadata`
