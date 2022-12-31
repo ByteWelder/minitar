@@ -2,7 +2,7 @@
 
 Tiny and easy-to-use C library to parse tar (specifically, the newer [USTAR](https://www.ibm.com/docs/en/zos/2.3.0?topic=formats-tar-format-tar-archives#taf) variant, which is the one pretty much everybody uses) archives. 
 
-No third-party dependencies, only a minimally capable standard C library (file IO, number parsing, malloc() and friends, string functions). 
+No third-party dependencies, only a minimally capable standard C library (file IO, string functions). 
 
 Aims to be bloat-free (currently less than 500 LoC), fast and optimized, and as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [basename](https://linux.die.net/man/3/basename)).
 

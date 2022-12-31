@@ -1,6 +1,8 @@
 #include "minitar.h"
 #include "tar.h"
 #include <assert.h>
+#include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,6 +72,33 @@ static char* minitar_basename(char* path)
     return beg + 1;
 }
 
+static uint64_t parse_digit(char c)
+{
+    return c - '0';
+}
+
+static int is_valid_octal_digit(char c)
+{
+    if (!isdigit(c)) return 0;
+    if (parse_digit(c) >= 8ull) return 0;
+    return 1;
+}
+
+static uint64_t minitar_parse_octal(const char* str)
+{
+    uint64_t result = 0;
+
+    while (isspace(*str)) str++;
+
+    while (is_valid_octal_digit(*str))
+    {
+        result = (result * 8ull) + parse_digit(*str);
+        str++;
+    }
+
+    return result;
+}
+
 // strcat, but for characters :)
 static void minitar_append_char(char* str, char c)
 {
@@ -137,17 +166,15 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
     // portability), which means we have to parse these strings (the size and mtime fields aren't even null-terminated!)
     // to get the far more user-friendlier integer values stored in our metadata structure.
 
-    metadata->mode = (mode_t)strtoul(hdr->mode, NULL, 8);
-    metadata->uid = (uid_t)strtoul(hdr->uid, NULL, 8);
-    metadata->gid = (gid_t)strtoul(hdr->gid, NULL, 8);
-
-    // FIXME: Maybe avoid heap allocations (strndup) for simply parsing non-null-terminated fields?
+    metadata->mode = (mode_t)minitar_parse_octal(hdr->mode);
+    metadata->uid = (uid_t)minitar_parse_octal(hdr->uid);
+    metadata->gid = (gid_t)minitar_parse_octal(hdr->gid);
 
     char* sizeptr = minitar_static_dup(hdr->size, 12);
-    metadata->size = (size_t)strtoull(sizeptr, NULL, 8);
+    metadata->size = (size_t)minitar_parse_octal(sizeptr);
 
     char* timeptr = minitar_static_dup(hdr->mtime, 12);
-    metadata->mtime = (time_t)strtoull(timeptr, NULL, 8);
+    metadata->mtime = (time_t)minitar_parse_octal(timeptr);
 
     // The type is stored as a character instead of an integer.
 
