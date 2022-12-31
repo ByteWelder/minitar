@@ -2,7 +2,7 @@
 
 Tiny and easy-to-use C library to parse tar (specifically, the newer [USTAR](https://www.ibm.com/docs/en/zos/2.3.0?topic=formats-tar-format-tar-archives#taf) variant, which is the one pretty much everybody uses) archives. 
 
-No third-party dependencies, only a minimally capable standard C library (file IO, string functions). 
+No third-party dependencies, only a minimally capable standard C library (pretty much only requires a basic subset of the C FILE API, apart from other simple functions). 
 
 Aims to be bloat-free (currently less than 500 LoC), fast and optimized, and as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [basename](https://linux.die.net/man/3/basename)).
 
@@ -63,7 +63,7 @@ This function returns 0 on success and -1 on end-of-file (when all entries have 
 ### minitar_rewind
 `void minitar_rewind(struct minitar* mp)`
 
-Rewinds the `struct minitar` back to the beginning of the archive file, which means that the next call to `minitar_read_entry()` will return the first entry instead of the entry after the last read entry.
+Rewinds the `struct minitar` back to the beginning of the archive file, which means that the next call to `minitar_read_entry()` will fetch the first entry instead of the entry after the last read entry.
 
 ### minitar_find_by_name
 `int minitar_find_by_name(struct minitar* mp, const char* name, struct minitar_entry* out)`
@@ -92,7 +92,7 @@ Same as `minitar_find_by_name()`, but matches the file type instead of the name.
 
 Reads up to `max` bytes of an entry's contents from the archive stream `mp` and stores them into `buf`.
 
-This function can be called as many times as desired, and at any given point in time, provided both `mp` and `entry` are valid. (`mp` should be the return value of a previous call to `minitar_open()`, and `entry` the return value of a previous call to `minitar_read_entry()`, `minitar_find_by_name()`, `minitar_find_by_path()` or `minitar_find_any_of()`).
+This function can be called as many times as desired, and at any given point in time, provided both `mp` and `entry` are valid. (`mp` should be initialized by a previous call to `minitar_open()`, and `entry` initialized by a previous call to `minitar_read_entry()`, `minitar_find_by_name()`, `minitar_find_by_path()` or `minitar_find_any_of()`).
 
 This function returns the number of bytes read, or 0 on error. 0 might also be a successful return value (if `max` is 0 or the entry's size is 0, for example), which means `errno` should be checked to see if 0 means error or simply 0 bytes read.
 
@@ -103,7 +103,7 @@ The contents are not null-terminated. If you want null-termination (keep in mind
 ### minitar_close
 `int minitar_close(struct minitar* mp)`
 
-Closes the tar archive file `mp` points to. The pointer passed to `minitar_close()` should be the return value of a previous call to `minitar_open()`.
+Closes the tar archive file `mp` points to. The pointer passed to `minitar_close()` should be initialized by a previous call to `minitar_open()`.
 
 Returns 0 on success, everything else is failure and you should check `errno`.
 
