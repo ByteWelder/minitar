@@ -1,6 +1,6 @@
 #include "tar.h"
 #include "minitar.h"
-#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 // all of these are defined in util.c
