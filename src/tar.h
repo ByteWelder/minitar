@@ -3,6 +3,8 @@
 
 // Format of a raw standard tar header.
 
+#pragma pack(push, 1)
+
 struct tar_header
 {
     char name[100];
@@ -23,6 +25,8 @@ struct tar_header
     char prefix[155];
 
     char padding[12]; // Not part of the header, only used to make the structure 512 bytes
-} __attribute__((packed));
+};
+
+#pragma pack(pop)
 
 #endif
