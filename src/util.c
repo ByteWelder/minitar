@@ -196,6 +196,32 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
     minitar_strlcpy(metadata->gname, hdr->gname, 32);
 }
 
+uint32_t minitar_checksum_header(const struct tar_header* hdr)
+{
+    uint32_t sum = 0;
+    const uint8_t* ptr = (const uint8_t*)hdr;
+
+    // Sum up all bytes in the header, as unsigned bytes...
+    while (ptr < (const uint8_t*)hdr + sizeof *hdr)
+    {
+        sum += *ptr;
+        ptr++;
+    }
+
+    // except for the chksum field, which is treated as...
+    ptr = (const uint8_t*)hdr->chksum;
+    while (ptr < (const uint8_t*)hdr->chksum + sizeof hdr->chksum)
+    {
+        sum -= *ptr;
+        ptr++;
+    }
+
+    // all blanks.
+    for (size_t i = 0; i < sizeof hdr->chksum; i++) { sum += ' '; }
+
+    return sum;
+}
+
 int minitar_validate_header(const struct tar_header* hdr)
 {
 #ifdef MINITAR_IGNORE_UNSUPPORTED_TYPES
@@ -205,6 +231,8 @@ int minitar_validate_header(const struct tar_header* hdr)
         hdr->typeflag != '3' && hdr->typeflag != '4' && hdr->typeflag != '5' && hdr->typeflag != '6')
         return 0;
 #endif
+    // FIXME: Warn on checksum mismatch unless header is all blanks?
+    if (minitar_checksum_header(hdr) != minitar_parse_octal(hdr->chksum)) return 0;
     return !strncmp(hdr->magic, "ustar", 5);
 }
 
