@@ -1,5 +1,6 @@
 #ifndef MINITAR_H
 #define MINITAR_H
+#include <stddef.h>
 #include <stdio.h>
 #include <sys/types.h>
 
