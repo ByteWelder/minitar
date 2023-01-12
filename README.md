@@ -68,7 +68,7 @@ Rewinds the `struct minitar` back to the beginning of the archive file, which me
 ### minitar_find_by_name
 `int minitar_find_by_name(struct minitar* mp, const char* name, struct minitar_entry* out)`
 
-Stores the first entry with a matching name in `out` and returns 0, or non-zero if none are found. In this case, the state of `out` is unspecified and might have been changed by the function.
+Stores the first entry with a matching name in `out` and returns 0, or non-zero if none are found. If none are found, the state of `out` is unspecified and might have been changed by the function. (In this context, a "name" means the base name of a file, so `baz.txt` given the path `foo/bar/baz.txt`)
 
 This function starts searching from the current archive position, which means that to find a matching entry in the entire archive `minitar_rewind()` should be called on it first.
 
