@@ -39,6 +39,8 @@ int main(int argc, char** argv)
 
 The output of this example program when running it with an uncompressed tar archive is identical to that of `tar --list -f archive.tar` with the same uncompressed archive. And in most cases, it's faster as well!
 
+See [examples](examples/) for more examples using minitar.
+
 ## Project structure
 
 The user-facing API (functions defined in `minitar.h` and documented in this README) is implemented in `src/tar.c`. Utility and internally-used functions live in `src/util.c`.
