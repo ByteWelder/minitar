@@ -1,4 +1,10 @@
-/* Simple untar example for POSIX systems using minitar. */
+/*
+ * Copyright (c) 2023, apio.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * untar.c: Example utility which extracts files from a tar archive (POSIX only).
+ */
 
 #include <errno.h>
 #include <fcntl.h>

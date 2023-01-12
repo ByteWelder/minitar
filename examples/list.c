@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2023, apio.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * list.c: Example utility which lists files in a tar archive.
+ */
+
 #include <minitar.h>
 #include <stdio.h>
 

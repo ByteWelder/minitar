@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2022-2023, apio.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * tar.h: tar header structure.
+ */
+
 #ifndef MINITAR_TAR_H
 #define MINITAR_TAR_H
 

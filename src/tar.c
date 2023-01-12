@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2022-2023, apio.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * tar.c: minitar API implementation.
+ */
+
 #include "tar.h"
 #include "minitar.h"
 #include <stdio.h>
@@ -26,8 +34,7 @@ int minitar_close(struct minitar* mp)
 
 // Try to read a valid header, and construct an entry from it. If the 512-byte block at the current read offset is not a
 // valid header, valid is set to 0 so we can try again with the next block. In any other case, valid is set to 1. This
-// helps distinguish valid return values, null pointers that should be returned to the user (for example, EOF), and
-// invalid headers where we should just try again until we find a valid one.
+// helps distinguish valid return values, EOF, and invalid headers that we should just skip.
 static int minitar_try_to_read_valid_entry(struct minitar* mp, struct minitar_entry* out, int* valid)
 {
     struct tar_header hdr;

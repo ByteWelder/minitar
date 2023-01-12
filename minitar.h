@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2022-2023, apio.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * minitar.h: The minitar header.
+ */
+
 #ifndef MINITAR_H
 #define MINITAR_H
 #include <stddef.h>

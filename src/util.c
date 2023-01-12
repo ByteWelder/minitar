@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2022-2023, apio.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * util.c: Utility functions for minitar.
+ */
+
 #include "minitar.h"
 #include "tar.h"
 #include <ctype.h>
