@@ -14,6 +14,11 @@ enum minitar_file_type
     MTAR_DIRECTORY
 };
 
+struct minitar_entry_internal
+{
+    fpos_t _mt_position;
+};
+
 struct minitar_entry_metadata
 {
     char path[257];
@@ -31,7 +36,7 @@ struct minitar_entry_metadata
 struct minitar_entry
 {
     struct minitar_entry_metadata metadata;
-    fpos_t position;
+    struct minitar_entry_internal _internal;
 };
 
 #ifdef __cplusplus

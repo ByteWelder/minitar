@@ -109,4 +109,4 @@ An entry in a tar archive. Fields:
 
 `metadata`: The entry's metadata. (`struct minitar_entry_metadata`)
 
-`position`: Reserved for internal use. (`fpos_t`)
+`_internal`: Reserved for internal use. (`struct minitar_entry_internal`)

@@ -42,7 +42,7 @@ static int minitar_try_to_read_valid_entry(struct minitar* mp, struct minitar_en
 
     // Fetch the current read position (which is currently pointing to the start of the entry's contents), so we can
     // return back to it when reading the contents of this entry using minitar_read_contents().
-    if (fgetpos(mp->stream, &out->position)) return -1;
+    if (fgetpos(mp->stream, &out->_internal._mt_position)) return -1;
 
     minitar_parse_metadata_from_tar_header(&hdr, &out->metadata);
     if (out->metadata.size)
@@ -121,7 +121,7 @@ size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, ch
     // Save the current position
     if (fgetpos(mp->stream, &current_position)) return 0;
     // Move to the position stored in the entry
-    if (fsetpos(mp->stream, &entry->position)) return 0;
+    if (fsetpos(mp->stream, &entry->_internal._mt_position)) return 0;
 
     // We refuse to read more than the size indicated by the archive
     if (max > entry->metadata.size) max = entry->metadata.size;
