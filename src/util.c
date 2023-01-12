@@ -27,11 +27,6 @@ WEAK noreturn void minitar_handle_panic(const char* message)
     abort();
 }
 
-noreturn void minitar_panic(const char* message)
-{
-    minitar_handle_panic(message);
-}
-
 // Safer BSD-style replacement for strcpy/strncpy. Copies at most size-1 bytes from src into dest, always
 // null-terminating the result. Returns the full length of src, to make it easy to check for overflows. Non-standard, so
 // we provide our own implementation.
@@ -181,13 +176,13 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
     {
     case '\0':
     case '0': metadata->type = MTAR_REGULAR; break;
-    case '1': minitar_panic("Links to other files within a tar archive are unsupported");
-    case '2': minitar_panic("Symbolic links are unsupported");
-    case '3': minitar_panic("Character devices are unsupported");
-    case '4': minitar_panic("Block devices are unsupported");
+    case '1': minitar_handle_panic("Links to other files within a tar archive are unsupported");
+    case '2': minitar_handle_panic("Symbolic links are unsupported");
+    case '3': minitar_handle_panic("Character devices are unsupported");
+    case '4': minitar_handle_panic("Block devices are unsupported");
     case '5': metadata->type = MTAR_DIRECTORY; break;
-    case '6': minitar_panic("FIFOs are unsupported");
-    default: minitar_panic("Unknown entry type in tar header");
+    case '6': minitar_handle_panic("FIFOs are unsupported");
+    default: minitar_handle_panic("Unknown entry type in tar header");
     }
 
     minitar_strlcpy(metadata->uname, hdr->uname, 32);
@@ -238,7 +233,7 @@ int minitar_read_header(struct minitar* mp, struct tar_header* hdr)
 {
     size_t rc = fread(hdr, 1, sizeof *hdr, mp->stream);
     if (rc == 0 && feof(mp->stream)) return 0;
-    if (rc == 0 && ferror(mp->stream)) minitar_panic("Error while reading file header from tar archive");
-    if (rc < sizeof *hdr) minitar_panic("Valid tar files should be split in 512-byte blocks");
+    if (rc == 0 && ferror(mp->stream)) minitar_handle_panic("Error while reading file header from tar archive");
+    if (rc < sizeof *hdr) minitar_handle_panic("Valid tar files should be split in 512-byte blocks");
     return 1;
 }
