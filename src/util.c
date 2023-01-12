@@ -1,6 +1,5 @@
 #include "minitar.h"
 #include "tar.h"
-#include <assert.h>
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -124,7 +123,6 @@ static size_t minitar_align_down_to_block_size(size_t size)
 static char* minitar_static_dup(const char* str, size_t size)
 {
     static char result[1024];
-    assert(size < 1024);
     memcpy(result, str, size);
     result[size] = 0;
     return result;
