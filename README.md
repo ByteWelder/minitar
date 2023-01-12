@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 		if(minitar_read_entry(&mp, &entry) == 0) { 
 			printf("%s\n", entry.metadata.path);
 		} else break;
-	} while(true);
+	} while(1);
 	minitar_close(&mp);
 }
 ```
