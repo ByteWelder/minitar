@@ -47,6 +47,8 @@ The user-facing API (functions defined in `minitar.h` and documented in this REA
 
 ## Documentation
 
+See the [build instructions](docs/Build.md) to start using minitar.
+
 See the [API documentation](docs/API.md) for a full description of all functions and types.
 
 ## Error handling
