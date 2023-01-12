@@ -111,7 +111,7 @@ int minitar_find_any_of(struct minitar* mp, enum minitar_file_type type, struct 
     return -1;
 }
 
-size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max)
+size_t minitar_read_contents(struct minitar* mp, const struct minitar_entry* entry, char* buf, size_t max)
 {
     if (!max) return 0;
     if (!entry->metadata.size) return 0;
