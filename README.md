@@ -10,7 +10,7 @@ Does not include support for compressed archives. You'll have to pass those thro
 
 ## Example
 
-```
+```c
 #include <stdio.h>
 #include <minitar.h>
 
