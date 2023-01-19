@@ -203,7 +203,7 @@ uint32_t minitar_checksum_header(const struct tar_header* hdr)
     const uint8_t* ptr = (const uint8_t*)hdr;
 
     // Sum up all bytes in the header, as unsigned bytes...
-    while (ptr < (const uint8_t*)hdr + sizeof *hdr)
+    while (ptr < (const uint8_t*)hdr + (sizeof *hdr - sizeof hdr->padding))
     {
         sum += *ptr;
         ptr++;
