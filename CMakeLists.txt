@@ -30,3 +30,5 @@ endif()
 
 install(TARGETS minitar DESTINATION lib)
 install(FILES minitar.h DESTINATION include)
+
+add_subdirectory(examples)

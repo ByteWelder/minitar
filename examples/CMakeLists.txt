@@ -1,0 +1,5 @@
+add_executable(list EXCLUDE_FROM_ALL list.c)
+target_link_libraries(list PRIVATE minitar)
+
+add_executable(untar EXCLUDE_FROM_ALL untar.c)
+target_link_libraries(untar PRIVATE minitar)
