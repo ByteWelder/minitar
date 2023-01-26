@@ -45,7 +45,7 @@ static size_t minitar_strlcpy(char* dest, const char* src, size_t size)
     len = full_len = strlen(src);
     if (size == 0) return len;
     if (len > (size - 1)) len = size - 1;
-    for (size_t i = 0; i < len; ++i) { *(dest + i) = *(src + i); }
+    memcpy(dest, src, len);
     dest[len] = 0; // null-terminate
     return full_len;
 }
