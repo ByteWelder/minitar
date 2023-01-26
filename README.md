@@ -4,7 +4,7 @@ Tiny and easy-to-use C library to parse tar (specifically, the newer [USTAR](htt
 
 No third-party dependencies, only a minimally capable standard C library (pretty much only requires a basic subset of the C FILE API, apart from other simple functions). 
 
-Aims to be bloat-free (currently less than 500 LoC), fast and optimized, and as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [basename](https://linux.die.net/man/3/basename)).
+Aims to be bloat-free (currently just above 500 LoC), fast and optimized, and as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [basename](https://linux.die.net/man/3/basename)).
 
 Does not include support for compressed archives. You'll have to pass those through another program or library to decompress them before minitar can handle them.
 

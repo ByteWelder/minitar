@@ -162,6 +162,8 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
         metadata->path[256] = '\0';
     }
 
+    minitar_strlcpy(metadata->link, hdr->linkname, 101);
+
     minitar_parse_basename(metadata->path, metadata->name, sizeof(metadata->name));
 
     // Numeric fields in tar archives are stored as octal-encoded ASCII strings. Weird decision (supposedly for
@@ -185,7 +187,7 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
     case '\0':
     case '0': metadata->type = MTAR_REGULAR; break;
     case '1': minitar_handle_panic("Links to other files within a tar archive are unsupported");
-    case '2': minitar_handle_panic("Symbolic links are unsupported");
+    case '2': metadata->type = MTAR_SYMLINK; break;
     case '3': minitar_handle_panic("Character devices are unsupported");
     case '4': minitar_handle_panic("Block devices are unsupported");
     case '5': metadata->type = MTAR_DIRECTORY; break;
@@ -226,7 +228,7 @@ uint32_t minitar_checksum_header(const struct tar_header* hdr)
 int minitar_validate_header(const struct tar_header* hdr)
 {
 #ifdef MINITAR_IGNORE_UNSUPPORTED_TYPES
-    if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '5') return 0;
+    if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '2' && hdr->typeflag != '5') return 0;
 #else
     if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '1' && hdr->typeflag != '2' &&
         hdr->typeflag != '3' && hdr->typeflag != '4' && hdr->typeflag != '5' && hdr->typeflag != '6')

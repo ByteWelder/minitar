@@ -20,7 +20,8 @@ struct minitar
 enum minitar_file_type
 {
     MTAR_REGULAR,
-    MTAR_DIRECTORY
+    MTAR_DIRECTORY,
+    MTAR_SYMLINK
 };
 
 struct minitar_entry_internal
@@ -32,6 +33,7 @@ struct minitar_entry_metadata
 {
     char path[257];
     char name[128];
+    char link[101];
     mode_t mode;
     uid_t uid;
     gid_t gid;

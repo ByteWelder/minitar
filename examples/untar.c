@@ -6,6 +6,7 @@
  * untar.c: Example utility which extracts files from a tar archive (POSIX only).
  */
 
+#define _XOPEN_SOURCE 700
 #include <errno.h>
 #include <fcntl.h>
 #include <minitar.h>
@@ -84,6 +85,18 @@ int main(int argc, char** argv)
                 }
 
                 printf("untar %s\n", entry.metadata.path);
+            }
+            else if (entry.metadata.type == MTAR_SYMLINK)
+            {
+                int status = symlink(entry.metadata.link, entry.metadata.path);
+
+                if (status != 0)
+                {
+                    fprintf(stderr, "Failed to create symlink %s: %s\n", entry.metadata.path, strerror(errno));
+                    break;
+                }
+
+                printf("symlink %s -> %s\n", entry.metadata.path, entry.metadata.link);
             }
         }
         else
