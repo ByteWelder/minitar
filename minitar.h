@@ -21,7 +21,8 @@ enum minitar_file_type
 {
     MTAR_REGULAR,
     MTAR_DIRECTORY,
-    MTAR_SYMLINK
+    MTAR_SYMLINK,
+    MTAR_HARDLINK,
 };
 
 struct minitar_entry_internal

@@ -77,7 +77,9 @@ This enum lists all supported file types:
 
 `MTAR_SYMLINK`: Symbolic links
 
-Other file types supported in tar archives, such as block/character devices, FIFOs, or hard links, are not supported and minitar will throw an error when encountering one of them. This behavior can be controlled by passing `-DMINITAR_IGNORE_UNSUPPORTED_TYPES=ON` to CMake when configuring, which will make minitar silently ignore such entries instead of panicking.
+`MTAR_HARDLINK`: Hard links
+
+Other file types supported in tar archives, such as block/character devices or FIFOs, are not supported and minitar will throw an error when encountering one of them. This behavior can be controlled by passing `-DMINITAR_IGNORE_UNSUPPORTED_TYPES=ON` to CMake when configuring, which will make minitar silently ignore such entries instead of panicking.
 
 ### minitar_entry_metadata
 `struct minitar_entry_metadata`
@@ -88,7 +90,7 @@ This structure represents an entry's metadata, with the following fields:
 
 `name`: A string representing the base name of the entry (the last component of its path). (`char[]`)
 
-`link`: A string representing the file being linked to. (Only applies to symlinks) (`char[]`)
+`link`: A string representing the file being linked to. (Only applies to symlinks/hard links) (`char[]`)
 
 `mode`: An integer representing the permissions of the entry. (`mode_t`)
 

@@ -98,6 +98,18 @@ int main(int argc, char** argv)
 
                 printf("symlink %s -> %s\n", entry.metadata.path, entry.metadata.link);
             }
+            else if (entry.metadata.type == MTAR_HARDLINK)
+            {
+                int status = link(entry.metadata.link, entry.metadata.path);
+
+                if (status != 0)
+                {
+                    fprintf(stderr, "Failed to create hard link %s: %s\n", entry.metadata.path, strerror(errno));
+                    break;
+                }
+
+                printf("link %s -> %s\n", entry.metadata.path, entry.metadata.link);
+            }
         }
         else
             break;
