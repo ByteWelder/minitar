@@ -79,6 +79,8 @@ This enum lists all supported file types:
 
 `MTAR_HARDLINK`: Hard links
 
+`MTAR_FIFO`: FIFO special files
+
 Other file types supported in tar archives, such as block/character devices or FIFOs, are not supported and minitar will throw an error when encountering one of them. This behavior can be controlled by passing `-DMINITAR_IGNORE_UNSUPPORTED_TYPES=ON` to CMake when configuring, which will make minitar silently ignore such entries instead of panicking.
 
 ### minitar_entry_metadata

@@ -193,7 +193,7 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
     case '3': minitar_handle_panic("Character devices are unsupported");
     case '4': minitar_handle_panic("Block devices are unsupported");
     case '5': metadata->type = MTAR_DIRECTORY; break;
-    case '6': minitar_handle_panic("FIFOs are unsupported");
+    case '6': metadata->type = MTAR_FIFO; break;
     // This case should have been previously handled by minitar_validate_header().
     default: minitar_handle_panic("Unknown entry type in tar header");
     }

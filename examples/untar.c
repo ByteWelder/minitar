@@ -110,6 +110,18 @@ int main(int argc, char** argv)
 
                 printf("link %s -> %s\n", entry.metadata.path, entry.metadata.link);
             }
+            else if (entry.metadata.type == MTAR_FIFO)
+            {
+                int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFIFO, 0);
+
+                if (status != 0)
+                {
+                    fprintf(stderr, "Failed to create FIFO %s: %s\n", entry.metadata.path, strerror(errno));
+                    break;
+                }
+
+                printf("fifo %s\n", entry.metadata.path);
+            }
         }
         else
             break;

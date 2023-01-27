@@ -23,6 +23,7 @@ enum minitar_file_type
     MTAR_DIRECTORY,
     MTAR_SYMLINK,
     MTAR_HARDLINK,
+    MTAR_FIFO,
 };
 
 struct minitar_entry_internal
