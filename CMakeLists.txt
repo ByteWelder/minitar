@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8..3.22)
 
-project(minitar LANGUAGES C VERSION 1.6.0)
+project(minitar LANGUAGES C VERSION 1.6.1)
 
 option(MINITAR_IGNORE_UNSUPPORTED_TYPES "Skip past entries that have unsupported types instead of panicking (deprecated)" OFF)
 

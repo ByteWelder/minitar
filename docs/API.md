@@ -81,6 +81,10 @@ This enum lists all supported file types:
 
 `MTAR_FIFO`: FIFO special files
 
+`MTAR_BLKDEV`: Block devices
+
+`MTAR_CHRDEV`: Character devices
+
 Other file types supported in tar archives, such as block/character devices or FIFOs, are not supported and minitar will throw an error when encountering one of them. This behavior can be controlled by passing `-DMINITAR_IGNORE_UNSUPPORTED_TYPES=ON` to CMake when configuring, which will make minitar silently ignore such entries instead of panicking.
 
 ### minitar_entry_metadata
@@ -109,6 +113,10 @@ This structure represents an entry's metadata, with the following fields:
 `uname`: A string representing the username of the entry's owner. (`char[]`)
 
 `gname`: A string representing the group name of the entry's owner. (`char[]`)
+
+`devmajor`: An integer representing the major number of a device. (`unsigned int`)
+
+`devminor`: An integer representing the minor number of a device. (`unsigned int`)
 
 ### minitar_entry
 `struct minitar_entry`
