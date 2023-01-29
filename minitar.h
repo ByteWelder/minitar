@@ -24,6 +24,8 @@ enum minitar_file_type
     MTAR_SYMLINK,
     MTAR_HARDLINK,
     MTAR_FIFO,
+    MTAR_CHRDEV,
+    MTAR_BLKDEV
 };
 
 struct minitar_entry_internal
@@ -44,6 +46,8 @@ struct minitar_entry_metadata
     enum minitar_file_type type;
     char uname[32];
     char gname[32];
+    unsigned devminor;
+    unsigned devmajor;
 };
 
 struct minitar_entry

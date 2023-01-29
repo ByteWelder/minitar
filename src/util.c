@@ -190,8 +190,8 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
     case '0': metadata->type = MTAR_REGULAR; break;
     case '1': metadata->type = MTAR_HARDLINK; break;
     case '2': metadata->type = MTAR_SYMLINK; break;
-    case '3': minitar_handle_panic("Character devices are unsupported");
-    case '4': minitar_handle_panic("Block devices are unsupported");
+    case '3': metadata->type = MTAR_CHRDEV; break;
+    case '4': metadata->type = MTAR_BLKDEV; break;
     case '5': metadata->type = MTAR_DIRECTORY; break;
     case '6': metadata->type = MTAR_FIFO; break;
     // This case should have been previously handled by minitar_validate_header().
@@ -200,6 +200,12 @@ void minitar_parse_metadata_from_tar_header(const struct tar_header* hdr, struct
 
     minitar_strlcpy(metadata->uname, hdr->uname, 32);
     minitar_strlcpy(metadata->gname, hdr->gname, 32);
+
+    if (metadata->type == MTAR_CHRDEV || metadata->type == MTAR_BLKDEV)
+    {
+        metadata->devminor = minitar_parse_octal(hdr->devminor);
+        metadata->devmajor = minitar_parse_octal(hdr->devmajor);
+    }
 }
 
 uint32_t minitar_checksum_header(const struct tar_header* hdr)
@@ -230,15 +236,9 @@ uint32_t minitar_checksum_header(const struct tar_header* hdr)
 
 int minitar_validate_header(const struct tar_header* hdr)
 {
-#ifdef MINITAR_IGNORE_UNSUPPORTED_TYPES
-    if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '1' && hdr->typeflag != '2' &&
-        hdr->typeflag != '5')
-        return 0;
-#else
     if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '1' && hdr->typeflag != '2' &&
         hdr->typeflag != '3' && hdr->typeflag != '4' && hdr->typeflag != '5' && hdr->typeflag != '6')
         return 0;
-#endif
     // FIXME: Warn on checksum mismatch unless header is all blanks?
     if (minitar_checksum_header(hdr) != minitar_parse_octal(hdr->chksum)) return 0;
     return !strncmp(hdr->magic, "ustar", 5);

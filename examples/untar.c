@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/sysmacros.h>
 #include <unistd.h>
 
 static int untar_file(const struct minitar_entry* entry, const void* buf)
@@ -48,6 +49,7 @@ int main(int argc, char** argv)
         perror(argv[1]);
         return 1;
     }
+    int exit_status = 0;
     struct minitar_entry entry;
     do {
         if (minitar_read_entry(&mp, &entry) == 0)
@@ -58,6 +60,7 @@ int main(int argc, char** argv)
                 if (status != 0)
                 {
                     fprintf(stderr, "Failed to create directory %s: %s\n", entry.metadata.path, strerror(errno));
+                    exit_status = 1;
                     break;
                 }
 
@@ -69,6 +72,7 @@ int main(int argc, char** argv)
                 if (!ptr)
                 {
                     perror("malloc");
+                    exit_status = 1;
                     break;
                 }
 
@@ -81,6 +85,7 @@ int main(int argc, char** argv)
                 if (status != 0)
                 {
                     fprintf(stderr, "Failed to extract file %s: %s\n", entry.metadata.path, strerror(errno));
+                    exit_status = 1;
                     break;
                 }
 
@@ -93,6 +98,7 @@ int main(int argc, char** argv)
                 if (status != 0)
                 {
                     fprintf(stderr, "Failed to create symlink %s: %s\n", entry.metadata.path, strerror(errno));
+                    exit_status = 1;
                     break;
                 }
 
@@ -105,6 +111,7 @@ int main(int argc, char** argv)
                 if (status != 0)
                 {
                     fprintf(stderr, "Failed to create hard link %s: %s\n", entry.metadata.path, strerror(errno));
+                    exit_status = 1;
                     break;
                 }
 
@@ -117,14 +124,50 @@ int main(int argc, char** argv)
                 if (status != 0)
                 {
                     fprintf(stderr, "Failed to create FIFO %s: %s\n", entry.metadata.path, strerror(errno));
+                    exit_status = 1;
                     break;
                 }
 
                 printf("fifo %s\n", entry.metadata.path);
+            }
+            else if (entry.metadata.type == MTAR_BLKDEV)
+            {
+                int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFBLK,
+                                   makedev(entry.metadata.devmajor, entry.metadata.devminor));
+
+                if (status != 0)
+                {
+                    fprintf(stderr, "Failed to create block device %s: %s\n", entry.metadata.path, strerror(errno));
+                    exit_status = 1;
+                    break;
+                }
+
+                printf("blkdev %s (%u:%u)\n", entry.metadata.path, entry.metadata.devmajor, entry.metadata.devminor);
+            }
+            else if (entry.metadata.type == MTAR_CHRDEV)
+            {
+                int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFCHR,
+                                   makedev(entry.metadata.devmajor, entry.metadata.devminor));
+
+                if (status != 0)
+                {
+                    fprintf(stderr, "Failed to create character device %s: %s\n", entry.metadata.path, strerror(errno));
+                    exit_status = 1;
+                    break;
+                }
+
+                printf("chrdev %s (%u:%u)\n", entry.metadata.path, entry.metadata.devmajor, entry.metadata.devminor);
+            }
+            else
+            {
+                fprintf(stderr, "error: unknown entry type: %d", entry.metadata.type);
+                exit_status = 1;
+                break;
             }
         }
         else
             break;
     } while (1);
     minitar_close(&mp);
+    return exit_status;
 }
