@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8..3.22)
 
 project(minitar LANGUAGES C VERSION 1.5.0)
 
-option(MINITAR_IGNORE_UNSUPPORTED_TYPES "Skip past entries that have unsupported types instead of panicking" OFF)
+option(MINITAR_IGNORE_UNSUPPORTED_TYPES "Skip past entries that have unsupported types instead of panicking (deprecated)" OFF)
 
 set(SOURCES
     src/tar.c
@@ -12,7 +12,7 @@ set(SOURCES
 add_library(minitar STATIC ${SOURCES})
 
 if(MINITAR_IGNORE_UNSUPPORTED_TYPES)
-target_compile_definitions(minitar PRIVATE MINITAR_IGNORE_UNSUPPORTED_TYPES)
+message(WARNING "MINITAR_IGNORE_UNSUPPORTED_TYPES is deprecated, since there are no unsupported types anymore")
 endif()
 
 target_include_directories(minitar PUBLIC ${CMAKE_CURRENT_LIST_DIR}) # for minitar.h
