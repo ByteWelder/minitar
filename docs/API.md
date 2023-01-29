@@ -45,7 +45,7 @@ Same as `minitar_find_by_name()`, but matches the full path inside the archive i
 Same as `minitar_find_by_name()`, but matches the file type instead of the name. As with `minitar_find_by_name()`, this function starts searching from the current archive position and calling it in a loop until it returns -1 will find all matching entries.
 
 ### minitar_read_contents
-`size_t minitar_read_contents(struct minitar* mp, struct minitar_entry* entry, char* buf, size_t max)`
+`size_t minitar_read_contents(struct minitar* mp, const struct minitar_entry* entry, char* buf, size_t max)`
 
 Reads up to `max` bytes of an entry's contents from the archive stream `mp` and stores them into `buf`.
 
