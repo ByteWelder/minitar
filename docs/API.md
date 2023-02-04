@@ -44,7 +44,7 @@ Writes a special file entry (anything that does not have contents, so directorie
 
 This function only writes a header (generated from the metadata). The `size` field is written as 0, no matter what its original value was.
 
-This function does not write entries for regular files (metadata.type == `MTAR_REGULAR`). Trying to do so will result in minitar panicking (see [error handling](README.md#error-handling)). To write regular files, use `minitar_write_file_entry`.
+This function does not write entries for regular files (metadata.type == `MTAR_REGULAR`). Trying to do so will result in minitar panicking (see [error handling](../README.md#error-handling)). To write regular files, use `minitar_write_file_entry`.
 
 This function returns 0 on success.
 
