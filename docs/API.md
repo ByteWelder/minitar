@@ -1,10 +1,17 @@
 # minitar API documentation
 
+Functions/types suffixed with `_w` or that contain `write` in their names are part of the newer API for writing to archives. Other types/functions are part of the (older) API for reading archives.
+
 ## Functions
 ### minitar_open
 `int minitar_open(const char* pathname, struct minitar* mp)`
 
 Initializes the caller-provided `mp` structure by opening the archive pointed to by `pathname` for reading. Returns 0 on success, anything else is failure.
+
+### minitar_open_w
+`int minitar_open_w(const char* pathname, struct minitar_w* mp, enum minitar_write_mode mode)`
+
+Initializes the caller-provided `mp` structure by opening the archive pointed to by `pathname` for writing (in case `pathname` already exists, mode selects if the existing file is overwritten or if new entries are appended to it). Returns 0 on success, anything else is failure.
 
 ### minitar_read_entry
 `int minitar_read_entry(struct minitar* mp, struct minitar_entry* out)`
@@ -16,6 +23,30 @@ The `minitar_entry` structure consists of the file metadata (in the `metadata` f
 To read the contents of an entry, you should allocate a buffer large enough to hold `metadata.size` bytes and pass it to `minitar_read_contents()`.
 
 This function returns 0 on success and -1 on end-of-file (when all entries have been read).
+
+### minitar_write_file_entry
+`int minitar_write_file_entry(struct minitar_w* mp, const struct minitar_entry_metadata* metadata, char* buf)`
+
+Writes a regular file entry into a `struct minitar_w` which should be initialized by a previous call to `minitar_open_w()`.
+
+This function writes both a header (generated from the metadata) and the file contents in `buf`, which should be `metadata.size` bytes long.
+
+This function will only write entries for regular files (metadata.type == `MTAR_REGULAR`). It will ignore the `type` field and write the "regular file" type into the tar archive.
+
+To write any other kind of entry (directories, special files), use `minitar_write_special_entry`.
+
+This function returns 0 on success.
+
+### minitar_write_special_entry
+`int minitar_write_special_entry(struct minitar_w* mp, const struct minitar_entry_metadata* metadata)`
+
+Writes a special file entry (anything that does not have contents, so directories or special files) into a `struct minitar_w` which should be initialized by a previous call to `minitar_open_w()`.
+
+This function only writes a header (generated from the metadata). The `size` field is written as 0, no matter what its original value was.
+
+This function does not write entries for regular files (metadata.type == `MTAR_REGULAR`). Trying to do so will result in minitar panicking (see [error handling](README.md#error-handling)). To write regular files, use `minitar_write_file_entry`.
+
+This function returns 0 on success.
 
 ### minitar_rewind
 `void minitar_rewind(struct minitar* mp)`
@@ -64,6 +95,13 @@ Closes the tar archive file `mp` points to. The pointer passed to `minitar_close
 
 Returns 0 on success, everything else is failure and you should check `errno`.
 
+### minitar_close_w
+`int minitar_close_w(struct minitar_w* mp)`
+
+Closes the tar archive file `mp` points to. The pointer passed to `minitar_close_w()` should be initialized by a previous call to `minitar_open_w()`.
+
+Returns 0 on success, everything else is failure and you should check `errno`.
+
 ## Types
 
 ### minitar_file_type
@@ -86,6 +124,15 @@ This enum lists all supported file types:
 `MTAR_CHRDEV`: Character devices
 
 Other file types supported in tar archives, such as block/character devices or FIFOs, are not supported and minitar will throw an error when encountering one of them. This behavior can be controlled by passing `-DMINITAR_IGNORE_UNSUPPORTED_TYPES=ON` to CMake when configuring, which will make minitar silently ignore such entries instead of panicking.
+
+### minitar_write_mode
+`enum minitar_write_mode`
+
+This enum tells `minitar_open_w` what to do if the chosen archive path already exists:
+
+`MTAR_OVERWRITE`: Overwrite the archive
+
+`MTAR_APPEND`: Add new entries to the end of it
 
 ### minitar_entry_metadata
 `struct minitar_entry_metadata`
@@ -126,3 +173,13 @@ An entry in a tar archive. Fields:
 `metadata`: The entry's metadata. (`struct minitar_entry_metadata`)
 
 `_internal`: Reserved for internal use. (`struct minitar_entry_internal`)
+
+### minitar
+`struct minitar`
+
+An archive handle for the "reading" API. To write to an archive, use `struct minitar_w` and `minitar_open_w()` instead.
+
+### minitar_w
+`struct minitar_w`
+
+An archive handle for the "writing" API. To read from an archive, use `struct minitar` and `minitar_open()` instead.
