@@ -1,10 +1,10 @@
 # minitar
 
-Tiny and easy-to-use C library to parse tar (specifically, the newer [USTAR](https://www.ibm.com/docs/en/zos/2.3.0?topic=formats-tar-format-tar-archives#taf) variant, which is the one pretty much everybody uses) archives. 
+Tiny and easy-to-use C library to read/write tar (specifically, the [ustar](https://www.ibm.com/docs/en/zos/2.3.0?topic=formats-tar-format-tar-archives#taf) variant, which is a bit old but simple, and newer tar variants (pax, GNU tar) are mostly backwards-compatible with it) archives.
 
 No third-party dependencies, only a minimally capable standard C library (pretty much only requires a basic subset of the C FILE API, apart from other simple functions). 
 
-Aims to be bloat-free (currently just above 500 LoC), fast and optimized, and as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [basename](https://linux.die.net/man/3/basename)).
+Aims to be bloat-free (currently a bit above 500 LoC), fast and optimized, and as portable between systems as possible (has its own implementation of some non-standard functions, such as [strlcpy](https://linux.die.net/man/3/strlcpy) or [basename](https://linux.die.net/man/3/basename)).
 
 Does not include support for compressed archives. You'll have to pass those through another program or library to decompress them before minitar can handle them.
 
