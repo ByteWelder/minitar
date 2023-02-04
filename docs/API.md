@@ -6,12 +6,12 @@ Functions/types suffixed with `_w` or that contain `write` in their names are pa
 ### minitar_open
 `int minitar_open(const char* pathname, struct minitar* mp)`
 
-Initializes the caller-provided `mp` structure by opening the archive pointed to by `pathname` for reading. Returns 0 on success, anything else is failure.
+Initializes the caller-provided `mp` [handle](API.md#minitar) by opening the archive pointed to by `pathname` for reading. Returns 0 on success, anything else is failure.
 
 ### minitar_open_w
 `int minitar_open_w(const char* pathname, struct minitar_w* mp, enum minitar_write_mode mode)`
 
-Initializes the caller-provided `mp` structure by opening the archive pointed to by `pathname` for writing (in case `pathname` already exists, mode selects if the existing file is overwritten or if new entries are appended to it). Returns 0 on success, anything else is failure.
+Initializes the caller-provided `mp` [handle](API.md#minitar_w) by opening the archive pointed to by `pathname` for writing (in case `pathname` already exists, mode selects if the existing file is overwritten or if new entries are appended to it). Returns 0 on success, anything else is failure.
 
 ### minitar_read_entry
 `int minitar_read_entry(struct minitar* mp, struct minitar_entry* out)`
