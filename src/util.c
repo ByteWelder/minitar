@@ -234,6 +234,56 @@ uint32_t minitar_checksum_header(const struct tar_header* hdr)
     return sum;
 }
 
+void minitar_construct_header_from_metadata(struct tar_header* hdr, const struct minitar_entry_metadata* metadata)
+{
+    if (strlen(metadata->path) > 100)
+    {
+        minitar_handle_panic("FIXME: pathnames over 100 (using the prefix field) are unsupported for now");
+    }
+
+    // We intentionally want strncpy to not write a null terminator here if the path field is 100 bytes long.
+    strncpy(hdr->name, metadata->path, 100);
+
+    snprintf(hdr->mode, 8, "%.7o", metadata->mode);
+    snprintf(hdr->uid, 8, "%.7o", metadata->uid);
+    snprintf(hdr->gid, 8, "%.7o", metadata->gid);
+
+    // snprintf will write the null terminator past the size field. We don't care, as we will overwrite that zero later.
+    snprintf(hdr->size, 13, "%.12zo", metadata->size);
+    // Same here.
+    snprintf(hdr->mtime, 13, "%.12lo", metadata->mtime);
+
+    switch (metadata->type)
+    {
+    case MTAR_REGULAR: hdr->typeflag = '0'; break;
+    case MTAR_HARDLINK: hdr->typeflag = '1'; break;
+    case MTAR_SYMLINK: hdr->typeflag = '2'; break;
+    case MTAR_CHRDEV: hdr->typeflag = '3'; break;
+    case MTAR_BLKDEV: hdr->typeflag = '4'; break;
+    case MTAR_DIRECTORY: hdr->typeflag = '5'; break;
+    case MTAR_FIFO: hdr->typeflag = '6'; break;
+    }
+
+    strncpy(hdr->linkname, metadata->link, 100);
+
+    memcpy(hdr->magic, "ustar", 6);
+
+    hdr->version[0] = '0';
+    hdr->version[1] = '0';
+
+    strncpy(hdr->uname, metadata->uname, 32);
+    strncpy(hdr->gname, metadata->gname, 32);
+
+    snprintf(hdr->devmajor, 8, "%.7o", metadata->devmajor);
+    snprintf(hdr->devminor, 8, "%.7o", metadata->devminor);
+
+    memset(hdr->prefix, 0, sizeof(hdr->prefix));
+    memset(hdr->padding, 0, sizeof(hdr->padding));
+
+    uint32_t checksum = minitar_checksum_header(hdr);
+    snprintf(hdr->chksum, 8, "%.7o", checksum);
+}
+
 int minitar_validate_header(const struct tar_header* hdr)
 {
     if (hdr->typeflag != '\0' && hdr->typeflag != '0' && hdr->typeflag != '1' && hdr->typeflag != '2' &&

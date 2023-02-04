@@ -11,10 +11,18 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef __TINYC__
+#include <stdnoreturn.h>
+#else
+#define noreturn _Noreturn
+#endif
+
 // all of these are defined in util.c
 int minitar_read_header(struct minitar*, struct tar_header*);
+noreturn void minitar_handle_panic(const char*);
 int minitar_validate_header(const struct tar_header*);
 void minitar_parse_metadata_from_tar_header(const struct tar_header*, struct minitar_entry_metadata*);
+void minitar_construct_header_from_metadata(struct tar_header*, const struct minitar_entry_metadata*);
 size_t minitar_align_up_to_block_size(size_t);
 
 int minitar_open(const char* pathname, struct minitar* out)
@@ -27,7 +35,27 @@ int minitar_open(const char* pathname, struct minitar* out)
     return 0;
 }
 
+int minitar_open_w(const char* pathname, struct minitar_w* out, enum minitar_write_mode mode)
+{
+    const char* mode_string;
+    switch (mode)
+    {
+    case MTAR_APPEND: mode_string = "ab"; break;
+    case MTAR_OVERWRITE: mode_string = "wb"; break;
+    default: minitar_handle_panic("mode passed to minitar_open_w is not supported");
+    }
+    FILE* fp = fopen(pathname, mode_string);
+    if (!fp) return -1;
+    out->stream = fp;
+    return 0;
+}
+
 int minitar_close(struct minitar* mp)
+{
+    return fclose(mp->stream);
+}
+
+int minitar_close_w(struct minitar_w* mp)
 {
     return fclose(mp->stream);
 }
@@ -72,6 +100,47 @@ int minitar_read_entry(struct minitar* mp, struct minitar_entry* out)
         result = minitar_try_to_read_valid_entry(mp, out, &valid);
     } while (!valid); // Skip over invalid entries
     return result;
+}
+
+int minitar_write_file_entry(struct minitar_w* mp, const struct minitar_entry_metadata* metadata, char* buf)
+{
+    struct minitar_entry_metadata meta = *metadata;
+    meta.type = MTAR_REGULAR;
+
+    struct tar_header hdr;
+    minitar_construct_header_from_metadata(&hdr, &meta);
+    // Write the header.
+    size_t nwrite = fwrite(&hdr, sizeof(hdr), 1, mp->stream);
+    if (nwrite == 0 && ferror(mp->stream)) return -1;
+
+    // Write the file data.
+    nwrite = fwrite(buf, 1, meta.size, mp->stream);
+    if (nwrite == 0 && ferror(mp->stream)) return -1;
+
+    char zeroes[512];
+    memset(zeroes, 0, sizeof(zeroes));
+
+    // Write as many zeroes as necessary to finish a block.
+    size_t nzero = minitar_align_up_to_block_size(meta.size) - meta.size;
+    nwrite = fwrite(zeroes, 1, nzero, mp->stream);
+    if (nwrite == 0 && ferror(mp->stream)) return -1;
+
+    return 0;
+}
+
+int minitar_write_special_entry(struct minitar_w* mp, const struct minitar_entry_metadata* metadata)
+{
+    struct minitar_entry_metadata meta = *metadata;
+    if (meta.type == MTAR_REGULAR)
+        minitar_handle_panic("Trying to write a special entry, yet MTAR_REGULAR passed as the entry type");
+    meta.size = 0;
+
+    struct tar_header hdr;
+    minitar_construct_header_from_metadata(&hdr, &meta);
+    size_t nwrite = fwrite(&hdr, sizeof(hdr), 1, mp->stream);
+    if (nwrite == 0 && ferror(mp->stream)) return -1;
+
+    return 0;
 }
 
 void minitar_rewind(struct minitar* mp)
