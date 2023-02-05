@@ -27,7 +27,6 @@ int main(int argc, char** argv)
         return 1;
     }
     int exit_status = 0;
-    struct minitar_entry_metadata metadata;
     int arg = 2;
     while (arg < argc)
     {
