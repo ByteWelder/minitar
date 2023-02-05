@@ -44,6 +44,12 @@ int main(int argc, char** argv)
         fseek(fp, 0, SEEK_SET);
 
         char* buf = malloc(length);
+        if (!buf)
+        {
+            perror("malloc");
+            exit_status = 1;
+            break;
+        }
         fread(buf, 1, length, fp);
         if (ferror(fp))
         {
