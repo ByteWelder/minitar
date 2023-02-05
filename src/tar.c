@@ -120,7 +120,7 @@ int minitar_write_file_entry(struct minitar_w* mp, const struct minitar_entry_me
     char zeroes[512];
     memset(zeroes, 0, sizeof(zeroes));
 
-    // Write as many zeroes as necessary to finish a block.
+    // Pad with zeroes to finish a block (512 bytes).
     size_t nzero = minitar_align_up_to_block_size(meta.size) - meta.size;
     nwrite = fwrite(zeroes, 1, nzero, mp->stream);
     if (nwrite == 0 && ferror(mp->stream)) return -1;
