@@ -10,7 +10,15 @@
 #define MINITAR_H
 #include <stddef.h>
 #include <stdio.h>
+#include <time.h>
+
+#ifdef _MSC_VER
+typedef unsigned int mode_t;
+typedef unsigned int gid_t;
+typedef unsigned int uid_t;
+#else
 #include <sys/types.h>
+#endif
 
 struct minitar
 {
