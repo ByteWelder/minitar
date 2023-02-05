@@ -8,3 +8,5 @@ add_executable(pack EXCLUDE_FROM_ALL pack.c)
 target_link_libraries(pack PRIVATE minitar)
 
 add_custom_target(examples DEPENDS list untar pack)
+add_custom_target(examples-posix DEPENDS list untar pack)
+add_custom_target(examples-windows DEPENDS list)
