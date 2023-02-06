@@ -250,7 +250,7 @@ void minitar_construct_header_from_metadata(struct tar_header* hdr, const struct
     // snprintf will write the null terminator past the size field. We don't care, as we will overwrite that zero later.
     snprintf(hdr->size, 13, "%.12zo", metadata->size);
     // Same here.
-    snprintf(hdr->mtime, 13, "%.12lo", metadata->mtime);
+    snprintf(hdr->mtime, 13, "%.12llo", (long long)metadata->mtime);
 
     switch (metadata->type)
     {
