@@ -20,7 +20,7 @@
 #define noreturn _Noreturn
 #endif
 
-#if !defined(_MSC_VER) && !defined(__TINYC__)
+#if !defined(_WIN32) && !defined(__TINYC__)
 #define WEAK __attribute__((weak))
 #else
 #define WEAK

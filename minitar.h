@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 typedef unsigned int mode_t;
 typedef unsigned int gid_t;
 typedef unsigned int uid_t;
