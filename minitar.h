@@ -55,7 +55,7 @@ struct minitar_entry_internal
 struct minitar_entry_metadata
 {
     char path[257];
-    char name[128];
+    char name[101];
     char link[101];
     mode_t mode;
     uid_t uid;
