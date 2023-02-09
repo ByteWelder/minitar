@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     }
     struct minitar_entry entry;
     do {
-        if (minitar_read_entry(&mp, &entry) == 0) { printf("%s\n", entry.metadata.path); }
+        if (minitar_read_entry(&mp, &entry) == 0) { printf("%s (%s, %zu bytes, mode %o)\n", entry.metadata.path, entry.metadata.name, entry.metadata.size, entry.metadata.mode); }
         else
             break;
     } while (1);
