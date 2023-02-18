@@ -84,7 +84,7 @@ This function can be called as many times as desired, and at any given point in 
 
 This function returns the number of bytes read, or 0 on error. 0 might also be a successful return value (if `max` is 0 or the entry's size is 0, for example), which means `errno` should be checked to see if 0 means error or simply 0 bytes read.
 
-`minitar_read_contents()` only reads up to `metadata.size`, regardless of the value in `max`.
+`minitar_read_contents()` will never read more than `metadata.size`, regardless of the value in `max`. (so, if `max == SIZE_MAX`, `minitar_read_contents()` will always read `metadata.size` bytes).
 
 The contents are not null-terminated. If you want null-termination (keep in mind the contents might not be ASCII and might contain null bytes before the end), just do `buf[nread] = 0;`. In that case, the value of `max` should be one less than the size of the buffer, to make sure the zero byte is not written past the end of `buf` if `max` bytes are read.
 
