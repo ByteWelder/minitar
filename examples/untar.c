@@ -18,6 +18,7 @@
 #include <sys/sysmacros.h>
 #include <unistd.h>
 
+// NOTE: This should be done for all entries, not just regular files
 static int create_parent_recursively(const char* path)
 {
     char* path_copy = strdup(path);
