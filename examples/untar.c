@@ -9,6 +9,7 @@
 #define _XOPEN_SOURCE 700
 #include <errno.h>
 #include <fcntl.h>
+#include <libgen.h>
 #include <minitar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,8 +18,37 @@
 #include <sys/sysmacros.h>
 #include <unistd.h>
 
+static int create_parent_recursively(const char* path)
+{
+    char* path_copy = strdup(path);
+    if (!path_copy) return -1;
+
+    char* parent = dirname(path_copy);
+
+create:
+    if (mkdir(parent, 0755) < 0)
+    {
+        if (errno == ENOENT)
+        {
+            create_parent_recursively(parent);
+            goto create;
+        }
+
+        if (errno == EEXIST) goto success;
+
+        free(path_copy);
+        return -1;
+    }
+
+success:
+    free(path_copy);
+    return 0;
+}
+
 static int untar_file(const struct minitar_entry* entry, const void* buf)
 {
+    if (create_parent_recursively(entry->metadata.path) < 0) return 1;
+
     int fd = open(entry->metadata.path, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
     if (fd < 0) return 1;
 
