@@ -18,7 +18,6 @@
 #include <sys/sysmacros.h>
 #include <unistd.h>
 
-// NOTE: This should be done for all entries, not just regular files
 static int create_parent_recursively(const char* path)
 {
     char* path_copy = strdup(path);
@@ -62,6 +61,8 @@ static int untar_file(const struct minitar_entry* entry, const void* buf)
 
 static int untar_directory(const struct minitar_entry* entry)
 {
+    if (create_parent_recursively(entry->metadata.path) < 0) return 1;
+
     if (mkdir(entry->metadata.path, entry->metadata.mode) < 0) return 1;
 
     return 0;
@@ -124,10 +125,13 @@ int main(int argc, char** argv)
             }
             else if (entry.metadata.type == MTAR_SYMLINK)
             {
+                if (create_parent_recursively(entry.metadata.path) < 0) goto symlink_err;
+
                 int status = symlink(entry.metadata.link, entry.metadata.path);
 
                 if (status != 0)
                 {
+                symlink_err:
                     fprintf(stderr, "Failed to create symlink %s: %s\n", entry.metadata.path, strerror(errno));
                     exit_status = 1;
                     break;
@@ -137,10 +141,13 @@ int main(int argc, char** argv)
             }
             else if (entry.metadata.type == MTAR_HARDLINK)
             {
+                if (create_parent_recursively(entry.metadata.path) < 0) goto hardlink_err;
+
                 int status = link(entry.metadata.link, entry.metadata.path);
 
                 if (status != 0)
                 {
+                hardlink_err:
                     fprintf(stderr, "Failed to create hard link %s: %s\n", entry.metadata.path, strerror(errno));
                     exit_status = 1;
                     break;
@@ -150,10 +157,13 @@ int main(int argc, char** argv)
             }
             else if (entry.metadata.type == MTAR_FIFO)
             {
+                if (create_parent_recursively(entry.metadata.path) < 0) goto fifo_err;
+
                 int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFIFO, 0);
 
                 if (status != 0)
                 {
+                fifo_err:
                     fprintf(stderr, "Failed to create FIFO %s: %s\n", entry.metadata.path, strerror(errno));
                     exit_status = 1;
                     break;
@@ -163,11 +173,14 @@ int main(int argc, char** argv)
             }
             else if (entry.metadata.type == MTAR_BLKDEV)
             {
+                if (create_parent_recursively(entry.metadata.path) < 0) goto blkdev_err;
+
                 int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFBLK,
                                    makedev(entry.metadata.devmajor, entry.metadata.devminor));
 
                 if (status != 0)
                 {
+                blkdev_err:
                     fprintf(stderr, "Failed to create block device %s: %s\n", entry.metadata.path, strerror(errno));
                     exit_status = 1;
                     break;
@@ -177,11 +190,14 @@ int main(int argc, char** argv)
             }
             else if (entry.metadata.type == MTAR_CHRDEV)
             {
+                if (create_parent_recursively(entry.metadata.path) < 0) goto chrdev_err;
+
                 int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFCHR,
                                    makedev(entry.metadata.devmajor, entry.metadata.devminor));
 
                 if (status != 0)
                 {
+                chrdev_err:
                     fprintf(stderr, "Failed to create character device %s: %s\n", entry.metadata.path, strerror(errno));
                     exit_status = 1;
                     break;
