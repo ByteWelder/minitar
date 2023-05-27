@@ -71,7 +71,7 @@ int main(int argc, char** argv)
         strncpy(metadata.path, argv[arg], sizeof(metadata.path));
         metadata.uid = st.st_uid;
         metadata.gid = st.st_gid;
-        metadata.mtime = st.st_mtim.tv_sec;
+        metadata.mtime = st.st_mtime;
         metadata.size = length;
         metadata.type = MTAR_REGULAR;
         metadata.mode = st.st_mode & ~S_IFMT;

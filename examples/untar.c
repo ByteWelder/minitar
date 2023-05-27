@@ -157,6 +157,7 @@ int main(int argc, char** argv)
             }
             else if (entry.metadata.type == MTAR_FIFO)
             {
+#ifndef __luna__
                 if (create_parent_recursively(entry.metadata.path) < 0) goto fifo_err;
 
                 int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFIFO, 0);
@@ -168,11 +169,13 @@ int main(int argc, char** argv)
                     exit_status = 1;
                     break;
                 }
+#endif
 
                 printf("fifo %s\n", entry.metadata.path);
             }
             else if (entry.metadata.type == MTAR_BLKDEV)
             {
+#ifndef __luna__
                 if (create_parent_recursively(entry.metadata.path) < 0) goto blkdev_err;
 
                 int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFBLK,
@@ -185,11 +188,13 @@ int main(int argc, char** argv)
                     exit_status = 1;
                     break;
                 }
+#endif
 
                 printf("blkdev %s (%u:%u)\n", entry.metadata.path, entry.metadata.devmajor, entry.metadata.devminor);
             }
             else if (entry.metadata.type == MTAR_CHRDEV)
             {
+#ifndef __luna__
                 if (create_parent_recursively(entry.metadata.path) < 0) goto chrdev_err;
 
                 int status = mknod(entry.metadata.path, entry.metadata.mode | S_IFCHR,
@@ -202,6 +207,7 @@ int main(int argc, char** argv)
                     exit_status = 1;
                     break;
                 }
+#endif
 
                 printf("chrdev %s (%u:%u)\n", entry.metadata.path, entry.metadata.devmajor, entry.metadata.devminor);
             }
