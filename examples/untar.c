@@ -88,6 +88,7 @@ int main(int argc, char** argv)
         {
             if (entry.metadata.type == MTAR_DIRECTORY)
             {
+                if (!strcmp(entry.metadata.name, ".") || !strcmp(entry.metadata.name, "..")) continue;
                 int status = untar_directory(&entry);
                 if (status != 0)
                 {
