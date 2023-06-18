@@ -43,7 +43,7 @@ See [examples](examples/) for more examples using minitar.
 
 ## Project structure
 
-The user-facing API (functions defined in `minitar.h` and documented in this README) is implemented in `src/tar.c`. Utility and internally-used functions live in `src/util.c`.
+The user-facing API (functions defined in `minitar.h` and documented in [API.md](docs/API.md)) is implemented in `src/tar.c`. Utility and internally-used functions live in `src/util.c`.
 
 ## Documentation
 
