@@ -47,6 +47,7 @@ int main(int argc, char** argv)
         if (!buf)
         {
             perror("malloc");
+            fclose(fp);
             exit_status = 1;
             break;
         }
@@ -54,8 +55,7 @@ int main(int argc, char** argv)
         if (ferror(fp))
         {
             perror("fread");
-            exit_status = 1;
-            break;
+            goto err;
         }
 
         struct stat st;
@@ -63,8 +63,7 @@ int main(int argc, char** argv)
         if (rc < 0)
         {
             perror("fstat");
-            exit_status = 1;
-            break;
+            goto err;
         }
 
         struct minitar_entry_metadata metadata;
@@ -78,6 +77,7 @@ int main(int argc, char** argv)
 
         rc = minitar_write_file_entry(&mp, &metadata, buf);
         free(buf);
+        fclose(fp);
 
         if (rc != 0)
         {
@@ -87,6 +87,13 @@ int main(int argc, char** argv)
         }
 
         arg++;
+        continue;
+
+    err:
+        free(buf);
+        fclose(fp);
+        exit_status = 1;
+        break;
     }
     minitar_close_w(&mp);
     return exit_status;
