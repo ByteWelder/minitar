@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, apio.
+ * Copyright (c) 2023, Gabriel Scoarnec.
  *
  * SPDX-License-Identifier: BSD-2-Clause
  *
@@ -24,7 +24,11 @@ int main(int argc, char** argv)
     }
     struct minitar_entry entry;
     do {
-        if (minitar_read_entry(&mp, &entry) == 0) { printf("%s (%s, %zu bytes, mode %o)\n", entry.metadata.path, entry.metadata.name, entry.metadata.size, entry.metadata.mode); }
+        if (minitar_read_entry(&mp, &entry) == 0)
+        {
+            printf("%s (%s, %zu bytes, mode %o)\n", entry.metadata.path, entry.metadata.name, entry.metadata.size,
+                   entry.metadata.mode);
+        }
         else
             break;
     } while (1);

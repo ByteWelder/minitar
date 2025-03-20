@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, apio.
+ * Copyright (c) 2023, Gabriel Scoarnec.
  *
  * SPDX-License-Identifier: BSD-2-Clause
  *
