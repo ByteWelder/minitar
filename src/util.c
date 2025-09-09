@@ -90,7 +90,7 @@ static uint64_t minitar_parse_octal(const char* str)
 {
     uint64_t result = 0;
 
-    while (isspace(*str)) str++;
+    while (isspace((unsigned char)*str)) str++;
 
     while (is_valid_octal_digit(*str))
     {
