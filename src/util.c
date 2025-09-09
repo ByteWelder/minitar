@@ -243,7 +243,7 @@ void minitar_construct_header_from_metadata(struct tar_header* hdr, const struct
     // We intentionally want strncpy to not write a null terminator here if the path field is 100 bytes long.
     strncpy(hdr->name, metadata->path, 100);
 
-    snprintf(hdr->mode, 8, "%.7o", metadata->mode);
+    snprintf(hdr->mode, 8, "%.7lu", metadata->mode);
     snprintf(hdr->uid, 8, "%.7o", metadata->uid);
     snprintf(hdr->gid, 8, "%.7o", metadata->gid);
 
@@ -280,7 +280,7 @@ void minitar_construct_header_from_metadata(struct tar_header* hdr, const struct
     memset(hdr->padding, 0, sizeof(hdr->padding));
 
     uint32_t checksum = minitar_checksum_header(hdr);
-    snprintf(hdr->chksum, 8, "%.7o", checksum);
+    snprintf(hdr->chksum, 8, "%.7lu", checksum);
 }
 
 int minitar_validate_header(const struct tar_header* hdr)
