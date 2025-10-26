@@ -9,7 +9,6 @@
 #include "tar.h"
 #include "minitar.h"
 
-#include <esp_log.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/unistd.h>
