@@ -19,6 +19,7 @@
 #define noreturn _Noreturn
 #endif
 #include <fcntl.h>
+#include <unistd.h>
 
 #define MIN(a,b) ((a < b) ? a : b)
 
