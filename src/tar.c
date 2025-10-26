@@ -8,14 +8,20 @@
 
 #include "tar.h"
 #include "minitar.h"
+
+#include <esp_log.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/unistd.h>
 
 #ifndef __TINYC__
 #include <stdnoreturn.h>
 #else
 #define noreturn _Noreturn
 #endif
+#include <fcntl.h>
+
+#define MIN(a,b) ((a < b) ? a : b)
 
 // all of these are defined in util.c
 int minitar_read_header(struct minitar*, struct tar_header*);
@@ -209,4 +215,53 @@ size_t minitar_read_contents(struct minitar* mp, const struct minitar_entry* ent
     if (fsetpos(mp->stream, &current_position)) return 0;
 
     return nread;
+}
+
+size_t minitar_read_contents_to_file(struct minitar* mp, const struct minitar_entry* entry, const char* filePath)
+{
+    if (!entry->metadata.size) return 0;
+
+    fpos_t current_position;
+
+    // Save the current position
+    if (fgetpos(mp->stream, &current_position)) return 0;
+    // Move to the position stored in the entry
+    if (fsetpos(mp->stream, &entry->_internal._mt_position)) return 0;
+
+    // We refuse to read more than the size indicated by the archive
+    size_t bytes_left = entry->metadata.size;
+    char* buffer[512];
+
+    int output_file = open(filePath, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
+    if (output_file < 0) {
+        return -1;
+    }
+
+    do
+    {
+        size_t bytes_to_read = MIN(sizeof(buffer), bytes_left);
+        size_t bytes_read = fread(buffer, 1, bytes_to_read, mp->stream);
+
+        if (ferror(mp->stream)) {
+            close(output_file);
+            return -1;
+        }
+
+        if (bytes_read > 0) {
+            if (write(output_file, buffer, bytes_read) < 0) {
+                close(output_file);
+                return -1;
+            }
+        }
+        bytes_left -= bytes_read;
+    } while (bytes_left > 0);
+
+    close(output_file);
+
+    // Restore the current position
+    if (fsetpos(mp->stream, &current_position)) {
+        return 0;
+    }
+
+    return entry->metadata.size;
 }
