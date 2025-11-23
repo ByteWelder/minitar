@@ -217,51 +217,55 @@ size_t minitar_read_contents(struct minitar* mp, const struct minitar_entry* ent
     return nread;
 }
 
-size_t minitar_read_contents_to_file(struct minitar* mp, const struct minitar_entry* entry, const char* filePath)
-{
-    if (!entry->metadata.size) return 0;
+bool minitar_read_contents_to_file(struct minitar* mp, const struct minitar_entry* entry, const char* filePath) {
+    // Create zero-length files too
+    if (entry->metadata.size == 0) {
+        int fd = open(filePath, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+        if (fd < 0) return false; // signal failure
+        close(fd);
+        return true; // 0 bytes written is success for an empty file
+    }
 
     fpos_t current_position;
+    if (fgetpos(mp->stream, &current_position)) return false;
+    if (fsetpos(mp->stream, &entry->_internal._mt_position)) return false;
 
-    // Save the current position
-    if (fgetpos(mp->stream, &current_position)) return 0;
-    // Move to the position stored in the entry
-    if (fsetpos(mp->stream, &entry->_internal._mt_position)) return 0;
-
-    // We refuse to read more than the size indicated by the archive
+    char buffer[512];
     size_t bytes_left = entry->metadata.size;
-    char* buffer[512];
 
-    int output_file = open(filePath, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0644);
-    if (output_file < 0) {
-        return -1;
+    int fd = open(filePath, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    if (fd < 0) {
+        // Restore stream position before returning
+        fsetpos(mp->stream, &current_position);
+        return false;
     }
 
-    do
-    {
-        size_t bytes_to_read = MIN(sizeof(buffer), bytes_left);
-        size_t bytes_read = fread(buffer, 1, bytes_to_read, mp->stream);
-
-        if (ferror(mp->stream)) {
-            close(output_file);
-            return -1;
-        }
-
-        if (bytes_read > 0) {
-            if (write(output_file, buffer, bytes_read) < 0) {
-                close(output_file);
-                return -1;
+    size_t total_written = 0;
+    while (bytes_left > 0) {
+        size_t to_read = bytes_left < sizeof(buffer) ? bytes_left : sizeof(buffer);
+        size_t n = fread(buffer, 1, to_read, mp->stream);
+        if (n == 0) {
+            // Read failure or unexpected EOF
+            if (ferror(mp->stream)) {
+                close(fd);
+                fsetpos(mp->stream, &current_position);
+                return false;
             }
+            // EOF before expected: treat as error
+            close(fd);
+            fsetpos(mp->stream, &current_position);
+            return false;
         }
-        bytes_left -= bytes_read;
-    } while (bytes_left > 0);
-
-    close(output_file);
-
-    // Restore the current position
-    if (fsetpos(mp->stream, &current_position)) {
-        return 0;
+        if (write(fd, buffer, n) < 0) {
+            close(fd);
+            fsetpos(mp->stream, &current_position);
+            return false;
+        }
+        total_written += n;
+        bytes_left -= n;
     }
 
-    return entry->metadata.size;
+    close(fd);
+    if (fsetpos(mp->stream, &current_position)) return false;
+    return true;
 }
