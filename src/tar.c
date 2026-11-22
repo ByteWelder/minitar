@@ -10,8 +10,13 @@
 #include "minitar.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/unistd.h>
+
+#ifdef ESP_PLATFORM
+#include <esp_heap_caps.h>
+#endif
 
 #ifndef __TINYC__
 #include <stdnoreturn.h>
@@ -217,6 +222,8 @@ size_t minitar_read_contents(struct minitar* mp, const struct minitar_entry* ent
     return nread;
 }
 
+#define COPY_BUFFER_SIZE 16384
+
 bool minitar_read_contents_to_file(struct minitar* mp, const struct minitar_entry* entry, const char* filePath) {
     // Create zero-length files too
     if (entry->metadata.size == 0) {
@@ -230,34 +237,51 @@ bool minitar_read_contents_to_file(struct minitar* mp, const struct minitar_entr
     if (fgetpos(mp->stream, &current_position)) return false;
     if (fsetpos(mp->stream, &entry->_internal._mt_position)) return false;
 
-    char buffer[512];
+    // PSRAM when available, then regular heap, then the stack buffer. A large buffer makes the file system write whole clusters instead of one sector per call
+    char small_buffer[512];
+    char* buffer = NULL;
+#ifdef ESP_PLATFORM
+    buffer = heap_caps_malloc(COPY_BUFFER_SIZE, MALLOC_CAP_SPIRAM);
+#endif
+    if (buffer == NULL) {
+        buffer = malloc(COPY_BUFFER_SIZE);
+    }
+    size_t buffer_size = COPY_BUFFER_SIZE;
+    if (buffer == NULL) {
+        buffer = small_buffer;
+        buffer_size = sizeof(small_buffer);
+    }
     size_t bytes_left = entry->metadata.size;
 
     int fd = open(filePath, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
     if (fd < 0) {
         // Restore stream position before returning
+        if (buffer != small_buffer) free(buffer);
         fsetpos(mp->stream, &current_position);
         return false;
     }
 
     size_t total_written = 0;
     while (bytes_left > 0) {
-        size_t to_read = bytes_left < sizeof(buffer) ? bytes_left : sizeof(buffer);
+        size_t to_read = bytes_left < buffer_size ? bytes_left : buffer_size;
         size_t n = fread(buffer, 1, to_read, mp->stream);
         if (n == 0) {
             // Read failure or unexpected EOF
             if (ferror(mp->stream)) {
                 close(fd);
+                if (buffer != small_buffer) free(buffer);
                 fsetpos(mp->stream, &current_position);
                 return false;
             }
             // EOF before expected: treat as error
             close(fd);
+            if (buffer != small_buffer) free(buffer);
             fsetpos(mp->stream, &current_position);
             return false;
         }
         if (write(fd, buffer, n) < 0) {
             close(fd);
+            if (buffer != small_buffer) free(buffer);
             fsetpos(mp->stream, &current_position);
             return false;
         }
@@ -266,6 +290,7 @@ bool minitar_read_contents_to_file(struct minitar* mp, const struct minitar_entr
     }
 
     close(fd);
+    if (buffer != small_buffer) free(buffer);
     if (fsetpos(mp->stream, &current_position)) return false;
     return true;
 }
