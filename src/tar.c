@@ -279,11 +279,16 @@ bool minitar_read_contents_to_file(struct minitar* mp, const struct minitar_entr
             fsetpos(mp->stream, &current_position);
             return false;
         }
-        if (write(fd, buffer, n) < 0) {
-            close(fd);
-            if (buffer != small_buffer) free(buffer);
-            fsetpos(mp->stream, &current_position);
-            return false;
+        size_t written = 0;
+        while (written < n) {
+            ssize_t result = write(fd, buffer + written, n - written);
+            if (result <= 0) {
+                close(fd);
+                if (buffer != small_buffer) free(buffer);
+                fsetpos(mp->stream, &current_position);
+                return false;
+            }
+            written += (size_t)result;
         }
         total_written += n;
         bytes_left -= n;
